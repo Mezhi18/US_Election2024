@@ -19,10 +19,30 @@ bibliography: references.bib
 #| message: false
 
 library(tidyverse)
-library(palmerpenguins)
+library(dplyr)
+
+data <- read.csv("../data/01-raw_data/raw_data.csv")
 ```
 
 
+
+```{r}
+# pollsters measured by highest numeric_grade, transparency_score, pollster_rating_id
+
+usdata <- data %>%
+  group_by(pollster) %>%
+  summarize(
+    pollster_rating_id = mean(pollster_rating_id, na.rm = TRUE),
+    numeric_grade = mean(numeric_grade, na.rm = TRUE),
+    pollscore = mean(pollscore, na.rm = TRUE),
+    transparency_score = mean(transparency_score, na.rm = TRUE)
+  ) %>%
+  filter(numeric_grade >= 1.5, transparency_score >= 5, pollster_rating_id >= 400) %>%
+    arrange(desc(pollster_rating_id))
+usdata
+
+# pollscore is negative ? how is it measured 
+```
 # Introduction
 
 Overview paragraph
