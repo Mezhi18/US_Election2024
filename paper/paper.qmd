@@ -13,6 +13,8 @@ number-sections: true
 bibliography: references.bib
 ---
 
+
+
 ```{r}
 #| include: false
 #| warning: false
@@ -20,29 +22,206 @@ bibliography: references.bib
 
 library(tidyverse)
 library(dplyr)
+library(janitor)
+```
 
-data <- read.csv("../data/01-raw_data/raw_data.csv")
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+
+#Load and clean data
+data <- read.csv("../data/01-raw_data/raw_data.csv") |>
+  clean_names()
+```
+
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# Filter NYT polls and remove entries with NA or empty value for statr
+# Select imporntat variables (change as you please)
+
+preddata <- data %>%
+ # filter(pollster_id == 1424 & !is.na(state) & state != "") %>%
+  select(display_name, question_id, sample_size, state, party, answer, candidate_id, candidate_name, pct, start_date, end_date)
+
+head(preddata)
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+#FILTERED SWING STATES, SUBJECT TO CHANGE, ALSO INCLUDED NATIONAL?
+
+harrisdata <- preddata %>%
+  filter(state %in% c("Georgia", "Arizona", "Nevada", "Michigan", "North Carolina", "Pennsylvania", "")) %>%
+  filter(candidate_name == "Kamala Harris") %>%
+  mutate(
+    state = if_else(state == "", "National", state),
+    end_date = mdy(end_date)
+  ) %>%
+  
+  # Step 4: Filter by date and calculate number of respondents
+  filter(end_date >= as.Date("2024-07-21")) %>%
+  mutate(
+    num_harris = round((pct / 100) * sample_size, 0)
+  )
+
+# Plot the filtered and transformed data
+base_plot <- ggplot(harrisdata, aes(x = end_date, y = pct)) +
+  theme_classic() +
+  labs(y = "Harris percent", x = "Date") +
+  geom_point(aes(color = state)) +
+  geom_smooth() +
+  theme(legend.position = "bottom")
+
+base_plot 
+
+base_plot +
+  geom_point() +
+  geom_smooth()
+
+```
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+## MODEL 1, LINEAR MODEL WITH PREDICTOR END_DATE
+
+model_date <- lm(pct ~ end_date, data = harrisdata)
+
+harrisdata <- harrisdata |>
+  mutate(
+    fitted_date = predict(model_date)
+  )
+
+
+ggplot(harrisdata, aes(x = end_date)) +
+  geom_point(aes(y = pct), color = "black") +
+  geom_line(aes(y = fitted_date), color = "blue", linetype = "dotted") +
+  theme_classic() +
+  labs(y = "Harris percent", x = "Date", title = "Linear Model: pct ~ end_date")
 ```
 
 
 
 ```{r}
-# pollsters measured by highest numeric_grade, transparency_score, pollster_rating_id
+#| include: false
+#| warning: false
+#| message: false
 
-usdata <- data %>%
-  group_by(pollster) %>%
-  summarize(
-    pollster_rating_id = mean(pollster_rating_id, na.rm = TRUE),
-    numeric_grade = mean(numeric_grade, na.rm = TRUE),
-    pollscore = mean(pollscore, na.rm = TRUE),
-    transparency_score = mean(transparency_score, na.rm = TRUE)
-  ) %>%
-  filter(numeric_grade >= 1.5, transparency_score >= 5, pollster_rating_id >= 400) %>%
-    arrange(desc(pollster_rating_id))
-usdata
+## MODEL 2, BAYESIAN MODEL WITH PREDICTOR END_DATE
 
-# pollscore is negative ? how is it measured 
+harrisdata <- harrisdata |>
+  mutate(state = factor(state))
+
+model1 <- cbind(num_harris, sample_size - num_harris) ~ (1 | state)
+
+priors <- normal(0, 2.5, autoscale = TRUE)
+
+bayesian_model_1 <- stan_glmer(
+  formula = model1,
+  data = harrisdata,
+  family = binomial(link = "logit"),
+  prior = priors,
+  prior_intercept = priors,
+  seed = 123,
+  cores = 4,
+  adapt_delta = 0.95
+)
 ```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+
+pp_check(bayesian_model_1)
+
+summary(bayesian_model_1)
+
+plot(bayesian_model_1, pars = "(Intercept)", prob = 0.95)
+
+```
+
+```{r}
+harrisdata <- harrisdata |>
+  mutate(
+    end_date_num = as.numeric(end_date - min(end_date))
+  )
+
+spline_model <- stan_glm(
+  pct ~ ns(end_date_num, df = 6),
+  data = harrisdata,
+  family = gaussian(),
+  prior = normal(0, 5),
+  prior_intercept = normal(50, 10),
+  seed = 1234,
+  iter = 2000,
+  chains = 4,
+  refresh = 0
+)
+
+summary(spline_model)
+pp_check(spline_model)
+
+# Summarize the model
+summary(spline_model)
+
+# Posterior predictive checks
+pp_check(spline_model)
+```
+
+```{r}
+new_data <- data.frame(
+  end_date_num = seq(
+    min(harrisdata$end_date_num),
+    max(harrisdata$end_date_num),
+    length.out = 100))
+
+posterior_preds <- posterior_predict(spline_model, newdata = new_data)
+
+pred_summary <- new_data |>
+  mutate(
+    pred_mean = colMeans(posterior_preds),
+    pred_lower = apply(posterior_preds, 2, quantile, probs = 0.025),
+    pred_upper = apply(posterior_preds, 2, quantile, probs = 0.975)
+  )
+
+ggplot(harrisdata, aes(x = end_date_num, y = pct)) +
+  geom_point() +
+  geom_line(
+    data = pred_summary,
+    aes(x = end_date_num, y = pred_mean),
+    color = "blue",
+    inherit.aes = FALSE
+  ) +
+  geom_ribbon(
+    data = pred_summary,
+    aes(x = end_date_num, ymin = pred_lower, ymax = pred_upper),
+    alpha = 0.2,
+    inherit.aes = FALSE
+  ) +
+  labs(
+    x = "Days since earliest poll",
+    y = "Percentage",
+    title = "Poll Percentage over Time with Spline Fit"
+  ) +
+  theme_minimal()
+
+```
+
+
+
+
+
 # Introduction
 
 Overview paragraph
@@ -221,7 +400,15 @@ Weaknesses and next steps should also be included.
 
 # Model details {#sec-model-details}
 
+
 ## Posterior predictive check
+
+Why we choose NYT?
+- `numeric_grade` is 3
+- `pollscore` is -1.5, a score of reliability called "Predictive Optimization of Latent skill Level in Surveys, Considering Overall Record, Empirically.", where negative numbers are better
+- `transparency_score` is 9, reflects pollsters transparency about their methodology (calculated based on how much information it discloses about its polls and weighted by recency)
+- `population_full` is 'rv', respondents are registered voters 
+
 
 In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
 
