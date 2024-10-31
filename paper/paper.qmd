@@ -23,6 +23,11 @@ bibliography: references.bib
 library(tidyverse)
 library(dplyr)
 library(janitor)
+library(lubridate)
+library(broom)
+library(modelsummary)
+library(rstanarm)
+library(splines)
 ```
 
 ```{r}
@@ -44,11 +49,13 @@ data <- read.csv("../data/01-raw_data/raw_data.csv") |>
 # Filter NYT polls and remove entries with NA or empty value for statr
 # Select imporntat variables (change as you please)
 
+#& !is.na(state) & state != ""
+
 preddata <- data %>%
- # filter(pollster_id == 1424 & !is.na(state) & state != "") %>%
+  filter(pollster_id == 1424) %>%
   select(display_name, question_id, sample_size, state, party, answer, candidate_id, candidate_name, pct, start_date, end_date)
 
-head(preddata)
+print(preddata)
 ```
 
 ```{r}
@@ -57,13 +64,11 @@ head(preddata)
 #| message: false
 
 #FILTERED SWING STATES, SUBJECT TO CHANGE, ALSO INCLUDED NATIONAL?
-
 harrisdata <- preddata %>%
-  filter(state %in% c("Georgia", "Arizona", "Nevada", "Michigan", "North Carolina", "Pennsylvania", "")) %>%
+  filter(state %in% c("Georgia", "Arizona", "Nevada", "Michigan", "North Carolina", "Pennsylvania", "Wisconsin")) %>%
   filter(candidate_name == "Kamala Harris") %>%
   mutate(
-    state = if_else(state == "", "National", state),
-    end_date = mdy(end_date)
+    end_date = mdy(end_date)    #is date mutated correctly here 
   ) %>%
   
   # Step 4: Filter by date and calculate number of respondents
@@ -72,43 +77,64 @@ harrisdata <- preddata %>%
     num_harris = round((pct / 100) * sample_size, 0)
   )
 
-# Plot the filtered and transformed data
+harrisdata
+
+#### Plot data ####
 base_plot <- ggplot(harrisdata, aes(x = end_date, y = pct)) +
   theme_classic() +
   labs(y = "Harris percent", x = "Date") +
-  geom_point(aes(color = state)) +
-  geom_smooth() +
-  theme(legend.position = "bottom")
+    theme(legend.position = "bottom")
 
-base_plot 
-
+# Plots poll estimates and overall smoothing
 base_plot +
   geom_point() +
   geom_smooth()
 
+# This gets messy - need to add a filter - see line 21
+base_plot +
+  geom_point(aes(color = state)) +
+  geom_smooth() +
+  theme(legend.position = "bottom")
+
 ```
+
+
 ```{r}
 #| echo: false
 #| warning: false
 #| message: false
 
-## MODEL 1, LINEAR MODEL WITH PREDICTOR END_DATE
+## MODEL 1, BAYESIAN MODEL WITH PREDICTOR STATE
 
-model_date <- lm(pct ~ end_date, data = harrisdata)
+# Define Model
+model1 <- cbind(num_harris, sample_size - num_harris) ~ (1 | state)
 
-harrisdata <- harrisdata |>
-  mutate(
-    fitted_date = predict(model_date)
-  )
+priors <- normal(0, 2.5, autoscale = TRUE)
 
+bayesian_model1 <- stan_glmer(
+  formula = model1,
+  data = harrisdata,
+  family = binomial(link = "logit"),
+  prior = priors,
+  prior_intercept = priors,
+  seed = 123,
+  cores = 4,
+  adapt_delta = 0.95
+)
 
-ggplot(harrisdata, aes(x = end_date)) +
-  geom_point(aes(y = pct), color = "black") +
-  geom_line(aes(y = fitted_date), color = "blue", linetype = "dotted") +
-  theme_classic() +
-  labs(y = "Harris percent", x = "Date", title = "Linear Model: pct ~ end_date")
 ```
 
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# Plot checks for model 1
+pp_check(bayesian_model1)
+summary(bayesian_model1)
+plot(bayesian_model1, pars = "(Intercept)", prob = 0.95)
+print(modelsummary(bayesian_model1))
+```
 
 
 ```{r}
@@ -116,17 +142,21 @@ ggplot(harrisdata, aes(x = end_date)) +
 #| warning: false
 #| message: false
 
-## MODEL 2, BAYESIAN MODEL WITH PREDICTOR END_DATE
+## MODEL 2, BAYESIAN MODEL WITH PREDICTOR END_DATE AND STATE
+
+# Turn end_date into quantifiable column, to use for model
+harrisdata <- harrisdata %>%
+  mutate(
+    end_date_num = as.numeric(end_date - min(end_date)))
 
 harrisdata <- harrisdata |>
   mutate(state = factor(state))
 
-model1 <- cbind(num_harris, sample_size - num_harris) ~ (1 | state)
+# Define Model 2
+model2 <- cbind(num_harris, sample_size - num_harris) ~ (1 | end_date_num) + (1 | state)
 
-priors <- normal(0, 2.5, autoscale = TRUE)
-
-bayesian_model_1 <- stan_glmer(
-  formula = model1,
+bayesian_model2 <- stan_glmer(
+  formula = model2,
   data = harrisdata,
   family = binomial(link = "logit"),
   prior = priors,
@@ -142,23 +172,22 @@ bayesian_model_1 <- stan_glmer(
 #| warning: false
 #| message: false
 
-
-pp_check(bayesian_model_1)
-
-summary(bayesian_model_1)
-
-plot(bayesian_model_1, pars = "(Intercept)", prob = 0.95)
-
+# Plot checks for Model 2
+pp_check(bayesian_model2)
+summary(bayesian_model2)
+plot(bayesian_model2, pars = "(Intercept)", prob = 0.95)
+print(modelsummary(bayesian_model2))
 ```
 
 ```{r}
-harrisdata <- harrisdata |>
-  mutate(
-    end_date_num = as.numeric(end_date - min(end_date))
-  )
+#| echo: false
+#| warning: false
+#| message: false
 
-spline_model <- stan_glm(
-  pct ~ ns(end_date_num, df = 6),
+# Predict and plot
+
+spline_model_pred <- stan_glm(
+  pct ~ ns(end_date_num, df = 5) + state,
   data = harrisdata,
   family = gaussian(),
   prior = normal(0, 5),
@@ -169,53 +198,47 @@ spline_model <- stan_glm(
   refresh = 0
 )
 
-summary(spline_model)
-pp_check(spline_model)
-
 # Summarize the model
-summary(spline_model)
+summary(spline_model_pred)
 
 # Posterior predictive checks
-pp_check(spline_model)
+pp_check(spline_model_pred)
 ```
 
 ```{r}
+
 new_data <- data.frame(
   end_date_num = seq(
     min(harrisdata$end_date_num),
     max(harrisdata$end_date_num),
-    length.out = 100))
+    length.out = 100),
+  state = factor("Georgia", levels = levels(harrisdata$state)))
 
-posterior_preds <- posterior_predict(spline_model, newdata = new_data)
+posterior_preds <- posterior_predict(spline_model_pred, newdata = new_data)
 
 pred_summary <- new_data |>
   mutate(
     pred_mean = colMeans(posterior_preds),
     pred_lower = apply(posterior_preds, 2, quantile, probs = 0.025),
-    pred_upper = apply(posterior_preds, 2, quantile, probs = 0.975)
-  )
+    pred_upper = apply(posterior_preds, 2, quantile, probs = 0.975))
 
-ggplot(harrisdata, aes(x = end_date_num, y = pct)) +
+ggplot(harrisdata, aes(x = end_date_num, y = pct, color = state)) +
   geom_point() +
   geom_line(
     data = pred_summary,
     aes(x = end_date_num, y = pred_mean),
     color = "blue",
-    inherit.aes = FALSE
-  ) +
+    inherit.aes = FALSE) +
   geom_ribbon(
     data = pred_summary,
     aes(x = end_date_num, ymin = pred_lower, ymax = pred_upper),
     alpha = 0.2,
-    inherit.aes = FALSE
-  ) +
+    inherit.aes = FALSE) +
   labs(
     x = "Days since earliest poll",
     y = "Percentage",
-    title = "Poll Percentage over Time with Spline Fit"
-  ) +
+    title = "Poll Percentage over Time with Spline Fit") +
   theme_minimal()
-
 ```
 
 
