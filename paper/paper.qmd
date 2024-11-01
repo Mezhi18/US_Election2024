@@ -13,6 +13,8 @@ number-sections: true
 bibliography: references.bib
 ---
 
+
+
 ```{r}
 #| include: false
 #| warning: false
@@ -20,29 +22,229 @@ bibliography: references.bib
 
 library(tidyverse)
 library(dplyr)
-
-data <- read.csv("../data/01-raw_data/raw_data.csv")
+library(janitor)
+library(lubridate)
+library(broom)
+library(modelsummary)
+library(rstanarm)
+library(splines)
 ```
 
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+
+#Load and clean data
+data <- read.csv("../data/01-raw_data/raw_data.csv") |>
+  clean_names()
+```
 
 
 ```{r}
-# pollsters measured by highest numeric_grade, transparency_score, pollster_rating_id
+#| echo: false
+#| warning: false
+#| message: false
 
-usdata <- data %>%
-  group_by(pollster) %>%
-  summarize(
-    pollster_rating_id = mean(pollster_rating_id, na.rm = TRUE),
-    numeric_grade = mean(numeric_grade, na.rm = TRUE),
-    pollscore = mean(pollscore, na.rm = TRUE),
-    transparency_score = mean(transparency_score, na.rm = TRUE)
-  ) %>%
-  filter(numeric_grade >= 1.5, transparency_score >= 5, pollster_rating_id >= 400) %>%
-    arrange(desc(pollster_rating_id))
-usdata
+# Filter NYT polls and remove entries with NA or empty value for statr
+# Select imporntat variables (change as you please)
 
-# pollscore is negative ? how is it measured 
+#& !is.na(state) & state != ""
+
+preddata <- data %>%
+  filter(pollster_id == 1424) %>%
+  select(display_name, question_id, sample_size, state, party, answer, candidate_id, candidate_name, pct, start_date, end_date)
+
+print(preddata)
 ```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+#FILTERED SWING STATES, SUBJECT TO CHANGE, ALSO INCLUDED NATIONAL?
+harrisdata <- preddata %>%
+  filter(state %in% c("Georgia", "Arizona", "Nevada", "Michigan", "North Carolina", "Pennsylvania", "Wisconsin")) %>%
+  filter(candidate_name == "Kamala Harris") %>%
+  mutate(
+    end_date = mdy(end_date)    #is date mutated correctly here 
+  ) %>%
+  
+  # Step 4: Filter by date and calculate number of respondents
+  filter(end_date >= as.Date("2024-07-21")) %>%
+  mutate(
+    num_harris = round((pct / 100) * sample_size, 0)
+  )
+
+harrisdata
+
+#### Plot data ####
+base_plot <- ggplot(harrisdata, aes(x = end_date, y = pct)) +
+  theme_classic() +
+  labs(y = "Harris percent", x = "Date") +
+    theme(legend.position = "bottom")
+
+# Plots poll estimates and overall smoothing
+base_plot +
+  geom_point() +
+  geom_smooth()
+
+# This gets messy - need to add a filter - see line 21
+base_plot +
+  geom_point(aes(color = state)) +
+  geom_smooth() +
+  theme(legend.position = "bottom")
+
+```
+
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+## MODEL 1, BAYESIAN MODEL WITH PREDICTOR STATE
+
+# Define Model
+model1 <- cbind(num_harris, sample_size - num_harris) ~ (1 | state)
+
+priors <- normal(0, 2.5, autoscale = TRUE)
+
+bayesian_model1 <- stan_glmer(
+  formula = model1,
+  data = harrisdata,
+  family = binomial(link = "logit"),
+  prior = priors,
+  prior_intercept = priors,
+  seed = 123,
+  cores = 4,
+  adapt_delta = 0.95
+)
+
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# Plot checks for model 1
+pp_check(bayesian_model1)
+summary(bayesian_model1)
+plot(bayesian_model1, pars = "(Intercept)", prob = 0.95)
+print(modelsummary(bayesian_model1))
+```
+
+
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+
+## MODEL 2, BAYESIAN MODEL WITH PREDICTOR END_DATE AND STATE
+
+# Turn end_date into quantifiable column, to use for model
+harrisdata <- harrisdata %>%
+  mutate(
+    end_date_num = as.numeric(end_date - min(end_date)))
+
+harrisdata <- harrisdata |>
+  mutate(state = factor(state))
+
+# Define Model 2
+model2 <- cbind(num_harris, sample_size - num_harris) ~ (1 | end_date_num) + (1 | state)
+
+bayesian_model2 <- stan_glmer(
+  formula = model2,
+  data = harrisdata,
+  family = binomial(link = "logit"),
+  prior = priors,
+  prior_intercept = priors,
+  seed = 123,
+  cores = 4,
+  adapt_delta = 0.95
+)
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# Plot checks for Model 2
+pp_check(bayesian_model2)
+summary(bayesian_model2)
+plot(bayesian_model2, pars = "(Intercept)", prob = 0.95)
+print(modelsummary(bayesian_model2))
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# Predict and plot
+
+spline_model_pred <- stan_glm(
+  pct ~ ns(end_date_num, df = 5) + state,
+  data = harrisdata,
+  family = gaussian(),
+  prior = normal(0, 5),
+  prior_intercept = normal(50, 10),
+  seed = 1234,
+  iter = 2000,
+  chains = 4,
+  refresh = 0
+)
+
+# Summarize the model
+summary(spline_model_pred)
+
+# Posterior predictive checks
+pp_check(spline_model_pred)
+```
+
+```{r}
+
+new_data <- data.frame(
+  end_date_num = seq(
+    min(harrisdata$end_date_num),
+    max(harrisdata$end_date_num),
+    length.out = 100),
+  state = factor("Georgia", levels = levels(harrisdata$state)))
+
+posterior_preds <- posterior_predict(spline_model_pred, newdata = new_data)
+
+pred_summary <- new_data |>
+  mutate(
+    pred_mean = colMeans(posterior_preds),
+    pred_lower = apply(posterior_preds, 2, quantile, probs = 0.025),
+    pred_upper = apply(posterior_preds, 2, quantile, probs = 0.975))
+
+ggplot(harrisdata, aes(x = end_date_num, y = pct, color = state)) +
+  geom_point() +
+  geom_line(
+    data = pred_summary,
+    aes(x = end_date_num, y = pred_mean),
+    color = "blue",
+    inherit.aes = FALSE) +
+  geom_ribbon(
+    data = pred_summary,
+    aes(x = end_date_num, ymin = pred_lower, ymax = pred_upper),
+    alpha = 0.2,
+    inherit.aes = FALSE) +
+  labs(
+    x = "Days since earliest poll",
+    y = "Percentage",
+    title = "Poll Percentage over Time with Spline Fit") +
+  theme_minimal()
+```
+
+
+
+
+
 # Introduction
 
 Overview paragraph
@@ -221,7 +423,15 @@ Weaknesses and next steps should also be included.
 
 # Model details {#sec-model-details}
 
+
 ## Posterior predictive check
+
+Why we choose NYT?
+- `numeric_grade` is 3
+- `pollscore` is -1.5, a score of reliability called "Predictive Optimization of Latent skill Level in Surveys, Considering Overall Record, Empirically.", where negative numbers are better
+- `transparency_score` is 9, reflects pollsters transparency about their methodology (calculated based on how much information it discloses about its polls and weighted by recency)
+- `population_full` is 'rv', respondents are registered voters 
+
 
 In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
 
