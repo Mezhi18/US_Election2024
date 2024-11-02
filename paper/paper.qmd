@@ -44,14 +44,15 @@ data <- read.csv("../data/01-raw_data/raw_data.csv") |>
 #| warning: false
 #| message: false
 
-# Filter NYT polls and remove entries with NA or empty value for statr
 # Select imporntat variables (change as you please)
 
-#& !is.na(state) & state != ""
-
 preddata <- data %>%
-  filter(pollster_id == 1424) %>%
-  select(display_name, question_id, sample_size, state, party, answer, candidate_id, candidate_name, pct, start_date, end_date)
+  filter(numeric_grade >1) %>%
+  select(pollster, sample_size, state, party, answer, candidate_id, candidate_name, pct, start_date, end_date, population, pollscore, numeric_grade) %>%
+  filter(!is.na(pollscore)) %>%
+  filter(!is.na(state) & state != "")
+
+print(preddata)
 
 ```
 
@@ -65,10 +66,8 @@ harrisdata <- preddata %>%
   filter(state %in% c("Georgia", "Arizona", "Nevada", "Michigan", "North Carolina", "Pennsylvania", "Wisconsin")) %>%
   filter(candidate_name == "Kamala Harris") %>%
   mutate(
-    end_date = mdy(end_date)    #is date mutated correctly here 
+    end_date = mdy(end_date)    #is date mutated correctly here
   ) %>%
-  
-  # Step 4: Filter by date and calculate number of respondents
   filter(end_date >= as.Date("2024-07-21")) %>%
   mutate(
     num_harris = round((pct / 100) * sample_size, 0)
@@ -100,43 +99,6 @@ base_plot +
 #| warning: false
 #| message: false
 
-## MODEL 1, BAYESIAN MODEL WITH PREDICTOR STATE
-
-# Define Model
-model1 <- cbind(num_harris, sample_size - num_harris) ~ (1 | state)
-
-priors <- normal(0, 2.5, autoscale = TRUE)
-
-bayesian_model1 <- stan_glmer(
-  formula = model1,
-  data = harrisdata,
-  family = binomial(link = "logit"),
-  prior = priors,
-  prior_intercept = priors,
-  seed = 123,
-  cores = 4,
-  adapt_delta = 0.95
-)
-
-```
-
-```{r}
-#| echo: false
-#| warning: false
-#| message: false
-
-# Plot checks for model 1
-pp_check(bayesian_model1)
-summary(bayesian_model1)
-plot(bayesian_model1, pars = "(Intercept)", prob = 0.95)
-print(modelsummary(bayesian_model1))
-```
-
-```{r}
-#| include: false
-#| warning: false
-#| message: false
-
 ## MODEL 2, BAYESIAN MODEL WITH PREDICTOR END_DATE AND STATE
 
 # Turn end_date into quantifiable column, to use for model
@@ -147,19 +109,18 @@ harrisdata <- harrisdata %>%
 harrisdata <- harrisdata |>
   mutate(state = factor(state))
 
-# Define Model 2
-model2 <- cbind(num_harris, sample_size - num_harris) ~ (1 | end_date_num) + (1 | state)
+# Define Model 1
+model <- cbind(num_harris, sample_size - num_harris) ~ (1 | state) + (1 | pollster) + (1 | end_date_num)
 
-bayesian_model2 <- stan_glmer(
-  formula = model2,
+bayesian_model <- stan_glmer(
+  formula = model,
   data = harrisdata,
   family = binomial(link = "logit"),
   prior = priors,
   prior_intercept = priors,
   seed = 123,
   cores = 4,
-  adapt_delta = 0.95
-)
+  adapt_delta = 0.95)
 ```
 
 ```{r}
@@ -167,11 +128,12 @@ bayesian_model2 <- stan_glmer(
 #| warning: false
 #| message: false
 
-# Plot checks for Model 2
-pp_check(bayesian_model2)
-summary(bayesian_model2)
-plot(bayesian_model2, pars = "(Intercept)", prob = 0.95)
-print(modelsummary(bayesian_model2))
+# Plot checks for Model
+pp_check(bayesian_model)
+summary(bayesian_model)
+plot(bayesian_model, pars = "(Intercept)", prob = 0.95)
+print(modelsummary(bayesian_model))
+summary(bayesian_model)
 ```
 
 ```{r}
@@ -182,7 +144,7 @@ print(modelsummary(bayesian_model2))
 # Predict and plot
 
 spline_model_pred <- stan_glm(
-  pct ~ ns(end_date_num, df = 5) + state,
+  pct ~ ns(end_date_num, df = 5) + state + pollster,
   data = harrisdata,
   family = gaussian(),
   prior = normal(0, 5),
@@ -200,13 +162,23 @@ summary(spline_model_pred)
 pp_check(spline_model_pred)
 ```
 
-```{r}
 
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# Convert `pollster` to a factor with defined levels if it's not already
+harrisdata$pollster <- factor(harrisdata$pollster, levels = unique(harrisdata$pollster))
+
+# Define the new data grid for prediction, ensuring each factor has the correct levels
 new_data <- data.frame(
   end_date_num = seq(
     min(harrisdata$end_date_num),
     max(harrisdata$end_date_num),
-    length.out = 100),
+    length.out = 100
+  ),
+   pollster = factor("YouGov", levels = levels(harrisdata$pollster)),
   state = factor("Georgia", levels = levels(harrisdata$state)))
 
 posterior_preds <- posterior_predict(spline_model_pred, newdata = new_data)
@@ -215,7 +187,8 @@ pred_summary <- new_data |>
   mutate(
     pred_mean = colMeans(posterior_preds),
     pred_lower = apply(posterior_preds, 2, quantile, probs = 0.025),
-    pred_upper = apply(posterior_preds, 2, quantile, probs = 0.975))
+    pred_upper = apply(posterior_preds, 2, quantile, probs = 0.975)
+  )
 
 ggplot(harrisdata, aes(x = end_date_num, y = pct, color = state)) +
   geom_point() +
@@ -233,6 +206,7 @@ ggplot(harrisdata, aes(x = end_date_num, y = pct, color = state)) +
     x = "Days since earliest poll",
     y = "Percentage",
     title = "Poll Percentage over Time with Spline Fit") +
+   facet_wrap(~ state, scales = "free_y") +
   theme_minimal()
 ```
 
