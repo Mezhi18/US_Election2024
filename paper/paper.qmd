@@ -100,7 +100,7 @@ base_plot +
 
 
 ```{r}
-#| echo: false
+#| include: false
 #| warning: false
 #| message: false
 
