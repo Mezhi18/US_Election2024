@@ -264,7 +264,7 @@ Telegraphing paragraph: The remainder of this paper is structured as follows. @s
 
 # Data {#sec-data}
 
-As our paper is about the 2024 United States federal election and more specifically we are looking at the pollsand the polling data comparing the two candidates, former President Donald Trump and Vice President Kamala Harris, for the upcoming election. Our orignal Data set had over 16,000 unique entries from different pollsters, the business or Organization that conducts the poll. Each poll has two entries one giving the Data for the polling a opinions of Donald Trump and the second for Kamala Harris.
+As our paper is about the 2024 United States federal election and more specifically we are looking at the polls and the polling data comparing the two candidates, former President Donald Trump and Vice President Kamala Harris, for the upcoming election. Our orignal Data set had over 16,000 unique entries from different pollsters, the business or Organization that conducts the poll. Each poll has two entries one giving the Data for the polling a opinions of Donald Trump and the second for Kamala Harris. We have aquired our polling data from @bibnotmadeyet.
 
 As there are over 50 variables many of which are redundent to our paper we will only discuss those that we have kept in our clean data as they are the only ones we use in our analysis.
 
@@ -274,7 +274,25 @@ As there are over 50 variables many of which are redundent to our paper we will 
 
 **sample_size:** This variable is the quantity of people that participated in the specific poll.
 
+**state:** This variable tells us in which States the poll was conducted.
 
+**party:** This variable tells us which party the poll participants intend to vot for.
+
+**answer:** This variable tells us the candidate the participant intend to vote for.
+
+**candidate_id:** This variable is the numerical value assigned to each candidate.
+
+**candidate_name**: This is the full name of the selected candidate.
+
+**pct:** This tells us the percentage of participents that intend to vote for the selected candidate.
+
+**start_date:** The date the pollster began conducting the poll.
+
+**end_date:** The date the pollster finished conducting the poll.
+
+**num_harris:** The numbner of participants that intend to vot for Kamala Harris.
+
+**end_date_num:** IDK
 
 
 
