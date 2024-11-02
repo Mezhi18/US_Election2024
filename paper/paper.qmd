@@ -8,8 +8,13 @@ thanks: "Code and data are available at: [https://github.com/Mezhi18/US_Election
 date: today
 date-format: long
 abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
-format: pdf
+format:
+  pdf:
+    bibliography: references.bib
+    documentclass: article
+    geometry: margin = 1in
 number-sections: true
+toc: true
 bibliography: references.bib
 ---
 
@@ -28,187 +33,6 @@ library(rstanarm)
 library(splines)
 ```
 
-```{r}
-#| include: false
-#| warning: false
-#| message: false
-
-
-#Load and clean data
-data <- read.csv("../data/01-raw_data/raw_data.csv") |>
-  clean_names()
-```
-
-```{r}
-#| echo: false
-#| warning: false
-#| message: false
-
-# Select imporntat variables (change as you please)
-
-preddata <- data %>%
-  filter(numeric_grade >1) %>%
-  select(pollster, sample_size, state, party, answer, candidate_id, candidate_name, pct, start_date, end_date, population, pollscore, numeric_grade) %>%
-  filter(!is.na(pollscore)) %>%
-  filter(!is.na(state) & state != "")
-
-print(preddata)
-
-```
-
-```{r}
-#| echo: false
-#| warning: false
-#| message: false
-
-#FILTERED SWING STATES, SUBJECT TO CHANGE, ALSO INCLUDED NATIONAL?
-harrisdata <- preddata %>%
-  filter(state %in% c("Georgia", "Arizona", "Nevada", "Michigan", "North Carolina", "Pennsylvania", "Wisconsin")) %>%
-  filter(candidate_name == "Kamala Harris") %>%
-  mutate(
-    end_date = mdy(end_date)    #is date mutated correctly here
-  ) %>%
-  filter(end_date >= as.Date("2024-07-21")) %>%
-  mutate(
-    num_harris = round((pct / 100) * sample_size, 0)
-  )
-
-harrisdata
-
-#### Plot data ####
-base_plot <- ggplot(harrisdata, aes(x = end_date, y = pct)) +
-  theme_classic() +
-  labs(y = "Harris percent", x = "Date") +
-    theme(legend.position = "bottom")
-
-# Plots poll estimates and overall smoothing
-base_plot +
-  geom_point() +
-  geom_smooth()
-
-# This gets messy - need to add a filter - see line 21
-base_plot +
-  geom_point(aes(color = state)) +
-  geom_smooth() +
-  theme(legend.position = "bottom")
-
-```
-
-```{r}
-#| include: false
-#| warning: false
-#| message: false
-
-## MODEL 2, BAYESIAN MODEL WITH PREDICTOR END_DATE AND STATE
-
-# Turn end_date into quantifiable column, to use for model
-harrisdata <- harrisdata %>%
-  mutate(
-    end_date_num = as.numeric(end_date - min(end_date)))
-
-harrisdata <- harrisdata |>
-  mutate(state = factor(state))
-
-# Define Model 1
-model <- cbind(num_harris, sample_size - num_harris) ~ (1 | state) + (1 | pollster) + (1 | end_date_num)
-
-bayesian_model <- stan_glmer(
-  formula = model,
-  data = harrisdata,
-  family = binomial(link = "logit"),
-  prior = priors,
-  prior_intercept = priors,
-  seed = 123,
-  cores = 4,
-  adapt_delta = 0.95)
-```
-
-```{r}
-#| echo: false
-#| warning: false
-#| message: false
-
-# Plot checks for Model
-pp_check(bayesian_model)
-summary(bayesian_model)
-plot(bayesian_model, pars = "(Intercept)", prob = 0.95)
-print(modelsummary(bayesian_model))
-summary(bayesian_model)
-```
-
-```{r}
-#| echo: false
-#| warning: false
-#| message: false
-
-# Predict and plot
-
-spline_model_pred <- stan_glm(
-  pct ~ ns(end_date_num, df = 5) + state + pollster,
-  data = harrisdata,
-  family = gaussian(),
-  prior = normal(0, 5),
-  prior_intercept = normal(50, 10),
-  seed = 1234,
-  iter = 2000,
-  chains = 4,
-  refresh = 0
-)
-
-# Summarize the model
-summary(spline_model_pred)
-
-# Posterior predictive checks
-pp_check(spline_model_pred)
-```
-
-
-```{r}
-#| echo: false
-#| warning: false
-#| message: false
-
-# Convert `pollster` to a factor with defined levels if it's not already
-harrisdata$pollster <- factor(harrisdata$pollster, levels = unique(harrisdata$pollster))
-
-# Define the new data grid for prediction, ensuring each factor has the correct levels
-new_data <- data.frame(
-  end_date_num = seq(
-    min(harrisdata$end_date_num),
-    max(harrisdata$end_date_num),
-    length.out = 100
-  ),
-   pollster = factor("YouGov", levels = levels(harrisdata$pollster)),
-  state = factor("Georgia", levels = levels(harrisdata$state)))
-
-posterior_preds <- posterior_predict(spline_model_pred, newdata = new_data)
-
-pred_summary <- new_data |>
-  mutate(
-    pred_mean = colMeans(posterior_preds),
-    pred_lower = apply(posterior_preds, 2, quantile, probs = 0.025),
-    pred_upper = apply(posterior_preds, 2, quantile, probs = 0.975)
-  )
-
-ggplot(harrisdata, aes(x = end_date_num, y = pct, color = state)) +
-  geom_point() +
-  geom_line(
-    data = pred_summary,
-    aes(x = end_date_num, y = pred_mean),
-    color = "blue",
-    inherit.aes = FALSE) +
-  geom_ribbon(
-    data = pred_summary,
-    aes(x = end_date_num, ymin = pred_lower, ymax = pred_upper),
-    alpha = 0.2,
-    inherit.aes = FALSE) +
-  labs(
-    x = "Days since earliest poll",
-    y = "Percentage",
-    title = "Poll Percentage over Time with Spline Fit") +
-   facet_wrap(~ state, scales = "free_y") +
-  theme_minimal()
-```
 
 # Introduction
 
@@ -226,79 +50,120 @@ Telegraphing paragraph: The remainder of this paper is structured as follows. @s
 
 # Data {#sec-data}
 
-As our paper is about the 2024 United States federal election and more specifically we are looking at the polls and the polling data comparing the two candidates, former President Donald Trump and Vice President Kamala Harris, for the upcoming election. Our original Data set had over 16,000 unique entries from different pollsters, the business or Organization that conducts the poll. Each poll has two entries one giving the Data for the polling a opinions of Donald Trump and the second for Kamala Harris. We have acquired our polling data from @bibnotmadeyet.
+## Overview
+
+As our paper is about the 2024 United States federal election and more specifically we are looking at the polls and the polling data comparing the two candidates, former President Donald Trump and Vice President Kamala Harris, for the upcoming election. Our original Data set had over 16,000 unique entries from different pollsters, the business or Organization that conducts the poll. Each poll has two entries, one giving the Data for the polling opinions of Donald Trump and the second for Kamala Harris. We have acquired our polling data from @bibnotmadeyet.
 
 As there are over 50 variables many of which are redundant to our paper we will only discuss those that we have kept in our clean data as they are the only ones we use in our analysis.
 
-**display_name:** This column shows the name of the Pollster that conducted the poll, as we want to keep consistency we are only looking at polls conducted by the New York Times.
+- `pollster`: Shows name of the Pollster that conducted the poll.
+- `sample_size`: The number of people that participated in the specific poll.
+- `state`: This variable tells us in which States the poll was conducted.
+- `candidate_name`: This is the full name of the selected candidate.
+- `pct`: This tells us the percentage of participants that intend to vote for the selected candidate.
+- `start_date`: The date the pollster began conducting the poll.
+- `end_date`: The date the pollster finished conducting the poll.
 
-**question_id:** This variable refers to the question that was asked in the specific poll.
+The variables that we have create are:
 
-**sample_size:** This variable is the quantity of people that participated in the specific poll.
+- `num_harris`: The number of participants that intend to vote for Kamala Harris.
+- `end_date_num`: The number of days since the first poll since Harris announced her candidacy. 
 
-**state:** This variable tells us in which States the poll was conducted.
+Each pollster has a numeric grade from 1.0 to 3.0, which indicates the quality/ reliability of the respective pollster. Additionally, each pollster is also given a transparency score from 1.0 to 10.0 reflecting how 'transparent' the pollster is, or how much information is disclosed about its polls and methodology. It is important for pollsters to maintain high numeric grades and transparency scores because these metrics directly reflect the quality and reliability of their data. To ensure the highest level of accuracy in our predictions, we only include polls with a numeric grade of 1.5 or above and a transparency score of 6.0 or above.
 
-**party:** This variable tells us which party the poll participants intend to vot for.
-
-**answer:** This variable tells us the candidate the participant intend to vote for.
-
-**candidate_id:** This variable is the numerical value assigned to each candidate.
-
-**candidate_name**: This is the full name of the selected candidate.
-
-**pct:** This tells us the percentage of participants that intend to vote for the selected candidate.
-
-**start_date:** The date the pollster began conducting the poll.
-
-**end_date:** The date the pollster finished conducting the poll.
-
-**num_harris:** The number of participants that intend to vote for Kamala Harris.
-
-**end_date_num:** IDK
-
-## Overview
+¿ does this go into data cleaning ?
 
 We use the statistical programming language R [@citeR].... Our data [@shelter].... Following @tellingstories, we consider...
 
-Overview text
 
-## Measurement
+## Methodology
 
-Some paragraphs about how we go from a phenomena in the world to an entry in the dataset.
+This paper uses 'polls-of-polls' method to analyze and predict our outcome, which combines polls from multiple sources (pollsters). By combining results from various sources, this approach incorporates diverse perspectives, which helps to minimize individual biases and provides a more balanced view. Unlike relying on a single poll, which can be influenced by its own biases, the 'polls-of-polls' method enhances reliability and increases the overall validity of the results.
+
+
+... explain how pollsters survey people, what their different methodologies are, and why these things are important for an accurate prediction...
+
+## Measurement/ Data Visualization 
+
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+
+#Load and clean data
+data <- read.csv("../data/01-raw_data/raw_data.csv") |>
+  clean_names()
+
+preddata <- data %>%
+  filter(numeric_grade >1.5 & transparency_score >6) %>%
+  select(pollster, sample_size, state, candidate_name, pct, start_date, end_date, pollscore, numeric_grade) %>%
+  filter(!is.na(pollscore)) %>%
+  filter(!is.na(state) & state != "")
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-supportstate
+#| fig-cap: "Distribution of Support Percentage by State"
+
+harrisdata <- preddata %>%
+  filter(state %in% c("Georgia", "Arizona", "Nevada", "Michigan", "North Carolina", "Pennsylvania", "Wisconsin")) %>%
+  filter(candidate_name == "Kamala Harris") %>%
+  mutate(end_date = mdy(end_date)) %>%
+  filter(end_date >= as.Date("2024-07-21")) %>%
+  mutate(num_harris = round((pct / 100) * sample_size, 0))
+
+ggplot(harrisdata, aes(x = reorder(state, pct, median), y = pct, fill = state)) +
+  geom_boxplot() +
+  coord_flip() +  # Flip for better readability
+  labs(x = "State", y = "Support Percentage") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+These are the statistics of each swing state by percetnage by state. 
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+#### Plot data ####
+base_plot <- ggplot(harrisdata, aes(x = end_date, y = pct)) +
+  theme_classic() +
+  labs(y = "Harris percent", x = "Date") +
+    theme(legend.position = "bottom")
+
+base_plot +
+  geom_point(aes(color = state)) +
+  geom_smooth() +
+  theme(legend.position = "bottom")
+
+ggplot(harrisdata, aes(x = end_date, y = pct, color = state)) +
+  geom_point() +
+  geom_smooth(se = TRUE) +
+  facet_wrap(~ state, scales = "free_y") +
+  labs(y = "Harris Percent", x = "Date", title = "Polling Trends for Kamala Harris by State") +
+  theme_minimal()
+
+```
 
 ## Outcome variables
 
 Add graphs, tables and text. Use sub-sub-headings for each outcome variable or update the subheading to be singular.
 
-<<<<<<< HEAD
 
 
 =======
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
+
 
 Talk more about it.
 
 And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
 
-```{r}
-#| label: fig-planes
-#| fig-cap: Relationship between wing length and width
-#| echo: false
-#| warning: false
-#| message: false
-
-analysis_data <- read_csv(here::here("data/02-analysis_data/analysis_data.csv"))
-
-analysis_data |> 
-  ggplot(aes(x = width, y = length)) +
-  geom_point(alpha = 0.8) +
-  theme_minimal() +
-  labs(x = "Wing width (mm)",
-       y = "Wing length (mm)")
-```
-
 Talk way more about it.
->>>>>>> eda40e1517683f0ad12e0bcd901797a2bb2abd7d
 
 ## Predictor variables
 
@@ -308,6 +173,127 @@ Use sub-sub-headings for each outcome variable and feel free to combine a few in
 
 # Model
 
+This is Model 1, follows Bayesian Model
+
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+
+# Turn end_date into quantifiable column, to use for model
+harrisdata <- harrisdata %>%
+  mutate(
+    end_date_num = as.numeric(end_date - min(end_date)))
+
+harrisdata <- harrisdata |>
+  mutate(state = factor(state))
+
+# Define Model
+model <- cbind(num_harris, sample_size - num_harris) ~ (1 | state) + (1 | pollster) + (1 | end_date_num)
+
+priors <- normal(0, 2.5, autoscale = TRUE)
+
+bayesian_model <- stan_glmer(
+  formula = model,
+  data = harrisdata,
+  family = binomial(link = "logit"),
+  prior = priors,
+  prior_intercept = priors,
+  weights = harrisdata$numeric_grade,
+  seed = 123,
+  cores = 4,
+  adapt_delta = 0.95)
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# Plot checks for Model
+pp_check(bayesian_model)
+plot(bayesian_model, pars = "(Intercept)", prob = 0.95)
+modelsummary(bayesian_model)
+```
+
+
+This is Model 2 
+
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+
+spline_model <- stan_glm(
+  pct ~ ns(end_date_num, df = 5) + pollster + state, 
+  data = harrisdata,
+  family = gaussian(),
+  prior = normal(0, 5),
+  prior_intercept = normal(50, 10),
+  seed = 1234,
+  iter = 2000,
+  chains = 4,
+  refresh = 0
+)
+
+# Summarize the model
+summary(spline_model)
+
+# Posterior predictive checks
+pp_check(spline_model)
+
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+
+harrisdata$pollster <- factor(harrisdata$pollster)
+harrisdata$state <- factor(harrisdata$state)
+
+new_data <- data.frame(
+  end_date_num = seq(
+    min(harrisdata$end_date_num),
+    max(harrisdata$end_date_num),
+    length.out = 100
+  ),
+  pollster = factor("YouGov", levels = levels(harrisdata$pollster)),
+  state = factor("Georgia", levels = levels(harrisdata$state)))
+
+posterior_preds <- posterior_predict(spline_model, newdata = new_data)
+
+pred_summary <- new_data |>
+  mutate(
+    pred_mean = colMeans(posterior_preds),
+    pred_lower = apply(posterior_preds, 2, quantile, probs = 0.025),
+    pred_upper = apply(posterior_preds, 2, quantile, probs = 0.975)
+  )
+
+# Plot data and Bayesian model predictions with confidence ribbon
+ggplot(harrisdata, aes(x = end_date_num, y = pct, color = state)) +
+  geom_point() +
+  geom_line(
+    data = pred_summary,
+    aes(x = end_date_num, y = pred_mean),
+    color = "blue",
+    inherit.aes = FALSE
+  ) +
+  geom_ribbon(
+    data = pred_summary,
+    aes(x = end_date_num, ymin = pred_lower, ymax = pred_upper),
+    alpha = 0.2,
+    inherit.aes = FALSE
+  ) +
+  labs(
+    x = "Days since earliest poll",
+    y = "Percentage",
+    title = "Poll Percentage over Time"
+  ) +
+  facet_wrap(~ state, scales = "free_y") +
+  theme_minimal()
+```
 The goal of our modelling strategy is twofold. Firstly,...
 
 Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
@@ -319,7 +305,7 @@ Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta
 ```{=tex}
 \begin{align} 
 y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \alpha + \beta_i + \gamma_i\\
+\mu_i &= \beta_0 + \beta_1 \times \mbox{State}_i + \beta_2 \times \mbox{Days Since First Poll}_i + \beta_3 \times \mbox{Pollster}_i \\
 \alpha &\sim \mbox{Normal}(0, 2.5) \\
 \beta &\sim \mbox{Normal}(0, 2.5) \\
 \gamma &\sim \mbox{Normal}(0, 2.5) \\
@@ -414,8 +400,7 @@ In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. 
 In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows...
 
 ```{r}
-#| eval: true
-#| echo: false
+#| eval: false
 #| message: false
 #| warning: false
 #| label: fig-ppcheckandposteriorvsprior
@@ -442,7 +427,7 @@ posterior_vs_prior(first_model) +
 
 ```{r}
 #| echo: false
-#| eval: true
+#| eval: false
 #| message: false
 #| warning: false
 #| label: fig-stanareyouokay
