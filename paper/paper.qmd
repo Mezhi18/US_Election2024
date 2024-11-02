@@ -264,6 +264,20 @@ Telegraphing paragraph: The remainder of this paper is structured as follows. @s
 
 # Data {#sec-data}
 
+As our paper is about the 2024 United States federal election and more specifically we are looking at the pollsand the polling data comparing the two candidates, former President Donald Trump and Vice President Kamala Harris, for the upcoming election. Our orignal Data set had over 16,000 unique entries from different pollsters, the business or Organization that conducts the poll. Each poll has two entries one giving the Data for the polling a opinions of Donald Trump and the second for Kamala Harris.
+
+As there are over 50 variables many of which are redundent to our paper we will only discuss those that we have kept in our clean data as they are the only ones we use in our analysis.
+
+**display_name:** This column shows the name of the Pollster that conducted the poll, as we want to keep consistency we are only looking at polls conducted by the New York Times.
+
+**question_id:** This varible refers to the question that was asked in the specific poll.
+
+**sample_size:** This variable is the quantity of people that participated in the specific poll.
+
+
+
+
+
 ## Overview
 
 We use the statistical programming language R [@citeR].... Our data [@shelter].... Following @tellingstories, we consider...
@@ -281,20 +295,6 @@ Add graphs, tables and text. Use sub-sub-headings for each outcome variable or u
 
 
 Some of our data is of penguins (@fig-bills), from @palmerpenguins.
-
-```{r}
-#| label: fig-bills
-#| fig-cap: Bills of penguins
-#| echo: false
-
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
-  theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
-```
 
 Talk more about it.
 
