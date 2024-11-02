@@ -33,6 +33,7 @@ library(splines)
 #| warning: false
 #| message: false
 
+
 #Load and clean data
 data <- read.csv("../data/01-raw_data/raw_data.csv") |>
   clean_names()
@@ -52,7 +53,6 @@ preddata <- data %>%
   filter(pollster_id == 1424) %>%
   select(display_name, question_id, sample_size, state, party, answer, candidate_id, candidate_name, pct, start_date, end_date)
 
-print(preddata)
 ```
 
 ```{r}
