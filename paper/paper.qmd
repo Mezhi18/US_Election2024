@@ -13,8 +13,6 @@ number-sections: true
 bibliography: references.bib
 ---
 
-
-
 ```{r}
 #| include: false
 #| warning: false
@@ -39,7 +37,6 @@ library(splines)
 data <- read.csv("../data/01-raw_data/raw_data.csv") |>
   clean_names()
 ```
-
 
 ```{r}
 #| echo: false
@@ -98,7 +95,6 @@ base_plot +
 
 ```
 
-
 ```{r}
 #| include: false
 #| warning: false
@@ -135,7 +131,6 @@ summary(bayesian_model1)
 plot(bayesian_model1, pars = "(Intercept)", prob = 0.95)
 print(modelsummary(bayesian_model1))
 ```
-
 
 ```{r}
 #| include: false
@@ -241,13 +236,11 @@ ggplot(harrisdata, aes(x = end_date_num, y = pct, color = state)) +
   theme_minimal()
 ```
 
-
-
-
-
 # Introduction
 
-Overview paragraph
+The 2024 United States presidential election represents a pivotal moment in the country's political landscape. As in previous elections, swing states are projected to play a critical role in determining the outcome. Swing states, which are characterized by their shifting voting patterns and balanced support for both major political parties, have historically been the focus of intense campaign efforts and polling analyses. Understanding the dynamics and voter preferences in these states is crucial to gaining insight into the broader electoral trends that could shape the nation's future.
+
+This paper aims to analyze polling data related to the 2024 election, with a particular emphasis on the swing states. By examining various polls and identifying patterns in voter sentiment, we seek to uncover the factors that may influence voter behavior in these highly contested regions. Our analysis will explore demographic shifts, the impact of key issues, and the level of voter engagement across different swing states. Through a comprehensive statistical approach, we aim to contribute to the understanding of the evolving electoral landscape and provide meaningful insights into the forces shaping the 2024 presidential election.
 
 Estimand paragraph
 
@@ -257,20 +250,15 @@ Why it matters paragraph
 
 Telegraphing paragraph: The remainder of this paper is structured as follows. @sec-data....
 
-
-
-
-
-
 # Data {#sec-data}
 
-As our paper is about the 2024 United States federal election and more specifically we are looking at the polls and the polling data comparing the two candidates, former President Donald Trump and Vice President Kamala Harris, for the upcoming election. Our orignal Data set had over 16,000 unique entries from different pollsters, the business or Organization that conducts the poll. Each poll has two entries one giving the Data for the polling a opinions of Donald Trump and the second for Kamala Harris. We have aquired our polling data from @bibnotmadeyet.
+As our paper is about the 2024 United States federal election and more specifically we are looking at the polls and the polling data comparing the two candidates, former President Donald Trump and Vice President Kamala Harris, for the upcoming election. Our original Data set had over 16,000 unique entries from different pollsters, the business or Organization that conducts the poll. Each poll has two entries one giving the Data for the polling a opinions of Donald Trump and the second for Kamala Harris. We have acquired our polling data from @bibnotmadeyet.
 
-As there are over 50 variables many of which are redundent to our paper we will only discuss those that we have kept in our clean data as they are the only ones we use in our analysis.
+As there are over 50 variables many of which are redundant to our paper we will only discuss those that we have kept in our clean data as they are the only ones we use in our analysis.
 
 **display_name:** This column shows the name of the Pollster that conducted the poll, as we want to keep consistency we are only looking at polls conducted by the New York Times.
 
-**question_id:** This varible refers to the question that was asked in the specific poll.
+**question_id:** This variable refers to the question that was asked in the specific poll.
 
 **sample_size:** This variable is the quantity of people that participated in the specific poll.
 
@@ -284,17 +272,15 @@ As there are over 50 variables many of which are redundent to our paper we will 
 
 **candidate_name**: This is the full name of the selected candidate.
 
-**pct:** This tells us the percentage of participents that intend to vote for the selected candidate.
+**pct:** This tells us the percentage of participants that intend to vote for the selected candidate.
 
 **start_date:** The date the pollster began conducting the poll.
 
 **end_date:** The date the pollster finished conducting the poll.
 
-**num_harris:** The numbner of participants that intend to vot for Kamala Harris.
+**num_harris:** The number of participants that intend to vote for Kamala Harris.
 
 **end_date_num:** IDK
-
-
 
 ## Overview
 
@@ -303,14 +289,12 @@ We use the statistical programming language R [@citeR].... Our data [@shelter]..
 Overview text
 
 ## Measurement
-	
+
 Some paragraphs about how we go from a phenomena in the world to an entry in the dataset.
 
 ## Outcome variables
 
 Add graphs, tables and text. Use sub-sub-headings for each outcome variable or update the subheading to be singular.
-
-
 
 Some of our data is of penguins (@fig-bills), from @palmerpenguins.
 
@@ -335,20 +319,13 @@ analysis_data |>
        y = "Wing length (mm)")
 ```
 
-Talk way more about it. 
+Talk way more about it.
 
 ## Predictor variables
 
 Add graphs, tables and text.
 
 Use sub-sub-headings for each outcome variable and feel free to combine a few into one if they go together naturally.
-
-
-
-
-
-
-
 
 # Model
 
@@ -358,8 +335,9 @@ Here we briefly describe the Bayesian analysis model used to investigate... Back
 
 ## Model set-up
 
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
+Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.
 
+```{=tex}
 \begin{align} 
 y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
 \mu_i &= \alpha + \beta_i + \gamma_i\\
@@ -368,16 +346,14 @@ y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
 \gamma &\sim \mbox{Normal}(0, 2.5) \\
 \sigma &\sim \mbox{Exponential}(1)
 \end{align}
-
+```
 We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
-
 
 ### Model justification
 
 We expect a positive relationship between the size of the wings and time spent aloft. In particular...
 
 We can use maths by including latex between dollar signs, for instance $\theta$.
-
 
 # Results
 
@@ -411,14 +387,11 @@ modelsummary::modelsummary(
 )
 ```
 
-
-
-
 # Discussion
 
 ## First discussion point {#sec-first-point}
 
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
+If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this.
 
 ## Second discussion point
 
@@ -434,26 +407,19 @@ Weaknesses and next steps should also be included.
 
 \appendix
 
-# Appendix {-}
-
+# Appendix {.unnumbered}
 
 # Additional data details
 
 # Model details {#sec-model-details}
 
-
 ## Posterior predictive check
 
-Why we choose NYT?
-- `numeric_grade` is 3
-- `pollscore` is -1.5, a score of reliability called "Predictive Optimization of Latent skill Level in Surveys, Considering Overall Record, Empirically.", where negative numbers are better
-- `transparency_score` is 9, reflects pollsters transparency about their methodology (calculated based on how much information it discloses about its polls and weighted by recency)
-- `population_full` is 'rv', respondents are registered voters 
-
+Why we choose NYT? - `numeric_grade` is 3 - `pollscore` is -1.5, a score of reliability called "Predictive Optimization of Latent skill Level in Surveys, Considering Overall Record, Empirically.", where negative numbers are better - `transparency_score` is 9, reflects pollsters transparency about their methodology (calculated based on how much information it discloses about its polls and weighted by recency) - `population_full` is 'rv', respondents are registered voters
 
 In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
 
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
+In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows...
 
 ```{r}
 #| eval: true
@@ -497,11 +463,6 @@ plot(first_model, "trace")
 plot(first_model, "rhat")
 ```
 
-
-
 \newpage
 
-
 # References
-
-
