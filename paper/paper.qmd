@@ -13,8 +13,6 @@ number-sections: true
 bibliography: references.bib
 ---
 
-
-
 ```{r}
 #| include: false
 #| warning: false
@@ -35,27 +33,27 @@ library(splines)
 #| warning: false
 #| message: false
 
+
 #Load and clean data
 data <- read.csv("../data/01-raw_data/raw_data.csv") |>
   clean_names()
 ```
-
 
 ```{r}
 #| echo: false
 #| warning: false
 #| message: false
 
-# Filter NYT polls and remove entries with NA or empty value for statr
 # Select imporntat variables (change as you please)
 
-#& !is.na(state) & state != ""
-
 preddata <- data %>%
-  filter(pollster_id == 1424) %>%
-  select(display_name, question_id, sample_size, state, party, answer, candidate_id, candidate_name, pct, start_date, end_date)
+  filter(numeric_grade >1) %>%
+  select(pollster, sample_size, state, party, answer, candidate_id, candidate_name, pct, start_date, end_date, population, pollscore, numeric_grade) %>%
+  filter(!is.na(pollscore)) %>%
+  filter(!is.na(state) & state != "")
 
 print(preddata)
+
 ```
 
 ```{r}
@@ -68,10 +66,8 @@ harrisdata <- preddata %>%
   filter(state %in% c("Georgia", "Arizona", "Nevada", "Michigan", "North Carolina", "Pennsylvania", "Wisconsin")) %>%
   filter(candidate_name == "Kamala Harris") %>%
   mutate(
-    end_date = mdy(end_date)    #is date mutated correctly here 
+    end_date = mdy(end_date)    #is date mutated correctly here
   ) %>%
-  
-  # Step 4: Filter by date and calculate number of respondents
   filter(end_date >= as.Date("2024-07-21")) %>%
   mutate(
     num_harris = round((pct / 100) * sample_size, 0)
@@ -98,45 +94,6 @@ base_plot +
 
 ```
 
-
-```{r}
-#| echo: false
-#| warning: false
-#| message: false
-
-## MODEL 1, BAYESIAN MODEL WITH PREDICTOR STATE
-
-# Define Model
-model1 <- cbind(num_harris, sample_size - num_harris) ~ (1 | state)
-
-priors <- normal(0, 2.5, autoscale = TRUE)
-
-bayesian_model1 <- stan_glmer(
-  formula = model1,
-  data = harrisdata,
-  family = binomial(link = "logit"),
-  prior = priors,
-  prior_intercept = priors,
-  seed = 123,
-  cores = 4,
-  adapt_delta = 0.95
-)
-
-```
-
-```{r}
-#| echo: false
-#| warning: false
-#| message: false
-
-# Plot checks for model 1
-pp_check(bayesian_model1)
-summary(bayesian_model1)
-plot(bayesian_model1, pars = "(Intercept)", prob = 0.95)
-print(modelsummary(bayesian_model1))
-```
-
-
 ```{r}
 #| include: false
 #| warning: false
@@ -152,19 +109,18 @@ harrisdata <- harrisdata %>%
 harrisdata <- harrisdata |>
   mutate(state = factor(state))
 
-# Define Model 2
-model2 <- cbind(num_harris, sample_size - num_harris) ~ (1 | end_date_num) + (1 | state)
+# Define Model 1
+model <- cbind(num_harris, sample_size - num_harris) ~ (1 | state) + (1 | pollster) + (1 | end_date_num)
 
-bayesian_model2 <- stan_glmer(
-  formula = model2,
+bayesian_model <- stan_glmer(
+  formula = model,
   data = harrisdata,
   family = binomial(link = "logit"),
   prior = priors,
   prior_intercept = priors,
   seed = 123,
   cores = 4,
-  adapt_delta = 0.95
-)
+  adapt_delta = 0.95)
 ```
 
 ```{r}
@@ -172,11 +128,12 @@ bayesian_model2 <- stan_glmer(
 #| warning: false
 #| message: false
 
-# Plot checks for Model 2
-pp_check(bayesian_model2)
-summary(bayesian_model2)
-plot(bayesian_model2, pars = "(Intercept)", prob = 0.95)
-print(modelsummary(bayesian_model2))
+# Plot checks for Model
+pp_check(bayesian_model)
+summary(bayesian_model)
+plot(bayesian_model, pars = "(Intercept)", prob = 0.95)
+print(modelsummary(bayesian_model))
+summary(bayesian_model)
 ```
 
 ```{r}
@@ -187,7 +144,7 @@ print(modelsummary(bayesian_model2))
 # Predict and plot
 
 spline_model_pred <- stan_glm(
-  pct ~ ns(end_date_num, df = 5) + state,
+  pct ~ ns(end_date_num, df = 5) + state + pollster,
   data = harrisdata,
   family = gaussian(),
   prior = normal(0, 5),
@@ -205,13 +162,23 @@ summary(spline_model_pred)
 pp_check(spline_model_pred)
 ```
 
-```{r}
 
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# Convert `pollster` to a factor with defined levels if it's not already
+harrisdata$pollster <- factor(harrisdata$pollster, levels = unique(harrisdata$pollster))
+
+# Define the new data grid for prediction, ensuring each factor has the correct levels
 new_data <- data.frame(
   end_date_num = seq(
     min(harrisdata$end_date_num),
     max(harrisdata$end_date_num),
-    length.out = 100),
+    length.out = 100
+  ),
+   pollster = factor("YouGov", levels = levels(harrisdata$pollster)),
   state = factor("Georgia", levels = levels(harrisdata$state)))
 
 posterior_preds <- posterior_predict(spline_model_pred, newdata = new_data)
@@ -220,7 +187,8 @@ pred_summary <- new_data |>
   mutate(
     pred_mean = colMeans(posterior_preds),
     pred_lower = apply(posterior_preds, 2, quantile, probs = 0.025),
-    pred_upper = apply(posterior_preds, 2, quantile, probs = 0.975))
+    pred_upper = apply(posterior_preds, 2, quantile, probs = 0.975)
+  )
 
 ggplot(harrisdata, aes(x = end_date_num, y = pct, color = state)) +
   geom_point() +
@@ -238,16 +206,15 @@ ggplot(harrisdata, aes(x = end_date_num, y = pct, color = state)) +
     x = "Days since earliest poll",
     y = "Percentage",
     title = "Poll Percentage over Time with Spline Fit") +
+   facet_wrap(~ state, scales = "free_y") +
   theme_minimal()
 ```
 
-
-
-
-
 # Introduction
 
-Overview paragraph
+The 2024 United States presidential election represents a pivotal moment in the country's political landscape. As in previous elections, swing states are projected to play a critical role in determining the outcome. Swing states, which are characterized by their shifting voting patterns and balanced support for both major political parties, have historically been the focus of intense campaign efforts and polling analyses. Understanding the dynamics and voter preferences in these states is crucial to gaining insight into the broader electoral trends that could shape the nation's future.
+
+In this paper we aim to analyze polling data related to the 2024 election, with a particular emphasis on the swing states. By examining various polls and identifying patterns in voter sentiment, we seek to uncover the factors that may influence voter behavior in these highly contested regions. Our analysis will explore demographic shifts, the impact of key issues, and the level of voter engagement across different swing states. Through a comprehensive statistical approach, we aim to contribute to the understanding of the evolving electoral landscape and provide meaningful insights into the forces shaping the 2024 presidential election.
 
 Estimand paragraph
 
@@ -257,12 +224,37 @@ Why it matters paragraph
 
 Telegraphing paragraph: The remainder of this paper is structured as follows. @sec-data....
 
-
-
-
-
-
 # Data {#sec-data}
+
+As our paper is about the 2024 United States federal election and more specifically we are looking at the polls and the polling data comparing the two candidates, former President Donald Trump and Vice President Kamala Harris, for the upcoming election. Our original Data set had over 16,000 unique entries from different pollsters, the business or Organization that conducts the poll. Each poll has two entries one giving the Data for the polling a opinions of Donald Trump and the second for Kamala Harris. We have acquired our polling data from @bibnotmadeyet.
+
+As there are over 50 variables many of which are redundant to our paper we will only discuss those that we have kept in our clean data as they are the only ones we use in our analysis.
+
+**display_name:** This column shows the name of the Pollster that conducted the poll, as we want to keep consistency we are only looking at polls conducted by the New York Times.
+
+**question_id:** This variable refers to the question that was asked in the specific poll.
+
+**sample_size:** This variable is the quantity of people that participated in the specific poll.
+
+**state:** This variable tells us in which States the poll was conducted.
+
+**party:** This variable tells us which party the poll participants intend to vot for.
+
+**answer:** This variable tells us the candidate the participant intend to vote for.
+
+**candidate_id:** This variable is the numerical value assigned to each candidate.
+
+**candidate_name**: This is the full name of the selected candidate.
+
+**pct:** This tells us the percentage of participants that intend to vote for the selected candidate.
+
+**start_date:** The date the pollster began conducting the poll.
+
+**end_date:** The date the pollster finished conducting the poll.
+
+**num_harris:** The number of participants that intend to vote for Kamala Harris.
+
+**end_date_num:** IDK
 
 ## Overview
 
@@ -271,28 +263,48 @@ We use the statistical programming language R [@citeR].... Our data [@shelter]..
 Overview text
 
 ## Measurement
-	
+
 Some paragraphs about how we go from a phenomena in the world to an entry in the dataset.
 
 ## Outcome variables
 
 Add graphs, tables and text. Use sub-sub-headings for each outcome variable or update the subheading to be singular.
 
+<<<<<<< HEAD
 
 
+=======
+Some of our data is of penguins (@fig-bills), from @palmerpenguins.
+
+Talk more about it.
+
+And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
+
+```{r}
+#| label: fig-planes
+#| fig-cap: Relationship between wing length and width
+#| echo: false
+#| warning: false
+#| message: false
+
+analysis_data <- read_csv(here::here("data/02-analysis_data/analysis_data.csv"))
+
+analysis_data |> 
+  ggplot(aes(x = width, y = length)) +
+  geom_point(alpha = 0.8) +
+  theme_minimal() +
+  labs(x = "Wing width (mm)",
+       y = "Wing length (mm)")
+```
+
+Talk way more about it.
+>>>>>>> eda40e1517683f0ad12e0bcd901797a2bb2abd7d
 
 ## Predictor variables
 
 Add graphs, tables and text.
 
 Use sub-sub-headings for each outcome variable and feel free to combine a few into one if they go together naturally.
-
-
-
-
-
-
-
 
 # Model
 
@@ -302,8 +314,9 @@ Here we briefly describe the Bayesian analysis model used to investigate... Back
 
 ## Model set-up
 
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
+Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.
 
+```{=tex}
 \begin{align} 
 y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
 \mu_i &= \alpha + \beta_i + \gamma_i\\
@@ -312,16 +325,14 @@ y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
 \gamma &\sim \mbox{Normal}(0, 2.5) \\
 \sigma &\sim \mbox{Exponential}(1)
 \end{align}
-
+```
 We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
-
 
 ### Model justification
 
 We expect a positive relationship between the size of the wings and time spent aloft. In particular...
 
 We can use maths by including latex between dollar signs, for instance $\theta$.
-
 
 # Results
 
@@ -355,20 +366,30 @@ modelsummary::modelsummary(
 )
 ```
 
-
-
-
 # Discussion
 
-## First discussion point {#sec-first-point}
+## Arizona {#sec-arizona}
 
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
+If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this.
 
-## Second discussion point
+## Georgia {#sec-georgia}
 
 Please don't use these as sub-heading labels - change them to be what your point actually is.
 
-## Third discussion point
+## Michigan {#sec-michigan}
+
+## Nevada {#sec-nevada}
+
+## North Carolina {#sec-norcar}
+
+## Michigan {#sec-michigan}
+
+## Pennsylvania {#sec-penn}
+
+## Wisconsin {#sec-Wisconsin}
+
+
+
 
 ## Weaknesses and next steps
 
@@ -378,26 +399,19 @@ Weaknesses and next steps should also be included.
 
 \appendix
 
-# Appendix {-}
-
+# Appendix {.unnumbered}
 
 # Additional data details
 
 # Model details {#sec-model-details}
 
-
 ## Posterior predictive check
 
-Why we choose NYT?
-- `numeric_grade` is 3
-- `pollscore` is -1.5, a score of reliability called "Predictive Optimization of Latent skill Level in Surveys, Considering Overall Record, Empirically.", where negative numbers are better
-- `transparency_score` is 9, reflects pollsters transparency about their methodology (calculated based on how much information it discloses about its polls and weighted by recency)
-- `population_full` is 'rv', respondents are registered voters 
-
+Why we choose NYT? - `numeric_grade` is 3 - `pollscore` is -1.5, a score of reliability called "Predictive Optimization of Latent skill Level in Surveys, Considering Overall Record, Empirically.", where negative numbers are better - `transparency_score` is 9, reflects pollsters transparency about their methodology (calculated based on how much information it discloses about its polls and weighted by recency) - `population_full` is 'rv', respondents are registered voters
 
 In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
 
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
+In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows...
 
 ```{r}
 #| eval: true
@@ -441,6 +455,7 @@ plot(first_model, "trace")
 plot(first_model, "rhat")
 ```
 
+<<<<<<< HEAD
 \newpage
 
 # Appendix 1
@@ -449,9 +464,8 @@ plot(first_model, "rhat")
 # Appendix 2
 
 
+=======
+>>>>>>> eda40e1517683f0ad12e0bcd901797a2bb2abd7d
 \newpage
 
-
 # References
-
-
