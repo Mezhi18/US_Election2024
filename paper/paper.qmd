@@ -154,11 +154,6 @@ ggplot(harrisdata, aes(x = end_date, y = pct, color = state)) +
 
 Add graphs, tables and text. Use sub-sub-headings for each outcome variable or update the subheading to be singular.
 
-
-
-=======
-
-
 Talk more about it.
 
 And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
@@ -174,6 +169,20 @@ Use sub-sub-headings for each outcome variable and feel free to combine a few in
 # Model
 
 This is Model 1, follows Bayesian Model
+
+We define our model as:
+
+*define each vairable here*
+```{=tex}
+\begin{align} 
+y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
+\mu_i &= \beta_0 + \beta_1 \times \mbox{State}_i + \beta_2 \times \mbox{Days Since First Poll}_i + \beta_3 \times \mbox{Pollster}_i \\
+\beta_0 &\sim \mbox{Normal}(0, 2.5) \\
+\beta_1 &\sim \mbox{Normal}(0, 2.5) \\
+\beta_2 &\sim \mbox{Normal}(0, 2.5) \\
+\beta_3 &\sim \mbox{Exponential}(1)
+\end{align}
+```
 
 ```{r}
 #| include: false
@@ -213,7 +222,13 @@ bayesian_model <- stan_glmer(
 # Plot checks for Model
 pp_check(bayesian_model)
 plot(bayesian_model, pars = "(Intercept)", prob = 0.95)
-modelsummary(bayesian_model)
+modelsummary::modelsummary(
+  list(
+    "First model" = bayesian_model
+  ),
+  statistic = "mad",
+  fmt = 2
+)
 ```
 
 
@@ -242,6 +257,13 @@ summary(spline_model)
 # Posterior predictive checks
 pp_check(spline_model)
 
+modelsummary::modelsummary(
+  list(
+    "First model" = spline_model
+  ),
+  statistic = "mad",
+  fmt = 2
+)
 ```
 
 ```{r}
@@ -300,25 +322,13 @@ Here we briefly describe the Bayesian analysis model used to investigate... Back
 
 ## Model set-up
 
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.
-
-```{=tex}
-\begin{align} 
-y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \beta_0 + \beta_1 \times \mbox{State}_i + \beta_2 \times \mbox{Days Since First Poll}_i + \beta_3 \times \mbox{Pollster}_i \\
-\alpha &\sim \mbox{Normal}(0, 2.5) \\
-\beta &\sim \mbox{Normal}(0, 2.5) \\
-\gamma &\sim \mbox{Normal}(0, 2.5) \\
-\sigma &\sim \mbox{Exponential}(1)
-\end{align}
-```
 We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
 
 ### Model justification
 
-We expect a positive relationship between the size of the wings and time spent aloft. In particular...
+What do we expect...
+We expect a predictions in the high 40% based on our current data.
 
-We can use maths by including latex between dollar signs, for instance $\theta$.
 
 # Results
 
