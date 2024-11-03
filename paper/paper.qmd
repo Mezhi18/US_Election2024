@@ -122,6 +122,8 @@ ggplot(harrisdata, aes(x = reorder(state, pct, median), y = pct, fill = state)) 
   theme_minimal() +
   theme(legend.position = "none")
 ```
+We focus on the swing states of the U.S, according to  [cite NYT PAPER]
+
 
 These are the statistics of each swing state by percetnage by state. 
 
@@ -316,6 +318,65 @@ ggplot(harrisdata, aes(x = end_date_num, y = pct, color = state)) +
   facet_wrap(~ state, scales = "free_y") +
   theme_minimal()
 ```
+
+# TRUMP #
+
+```{r}
+trumpdata <- preddata %>%
+  filter(state %in% c("Georgia", "Arizona", "Nevada", "Michigan", "North Carolina", "Pennsylvania", "Wisconsin")) %>%
+  filter(candidate_name == "Donald Trump") %>%
+  mutate(end_date = mdy(end_date)) %>%
+  filter(end_date >= as.Date("2024-07-21")) %>%
+  mutate(num_trump = round((pct / 100) * sample_size, 0))
+
+ggplot(trumpdata, aes(x = reorder(state, pct, median), y = pct, fill = state)) +
+  geom_boxplot() +
+  coord_flip() +  # Flip for better readability
+  labs(x = "State", y = "Support Percentage") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+trumpdata <- trumpdata %>%
+  mutate(
+    end_date_num = as.numeric(end_date - min(end_date)))
+
+trumpdata <- trumpdata |>
+  mutate(state = factor(state))
+
+# Define Model
+model2 <- cbind(num_trump, sample_size - num_trump) ~ (1 | state) + (1 | pollster) + (1 | end_date_num)
+
+priors <- normal(0, 2.5, autoscale = TRUE)
+
+bayesian_model2 <- stan_glmer(
+  formula = model2,
+  data = trumpdata,
+  family = binomial(link = "logit"),
+  prior = priors,
+  prior_intercept = priors,
+  weights = trumpdata$numeric_grade,
+  seed = 123,
+  cores = 4,
+  adapt_delta = 0.95)
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# Plot checks for Model
+pp_check(bayesian_model2)
+plot(bayesian_model2, pars = "(Intercept)", prob = 0.95)
+modelsummary::modelsummary(
+  list(
+    "First model" = bayesian_model2
+  ),
+  statistic = "mad",
+  fmt = 2
+)
+```
+
 The goal of our modelling strategy is twofold. Firstly,...
 
 Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
@@ -362,6 +423,68 @@ modelsummary::modelsummary(
 )
 ```
 
+```{r}
+harrisdata <- harrisdata %>% filter(!is.na(numeric_grade)) %>% filter(!is.na(num_harris))
+trumpdata <- trumpdata %>% filter(!is.na(numeric_grade)) %>% filter(!is.na(num_trump))
+trumpdata
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(rstanarm)
+
+harris_data <- harrisdata %>%
+  mutate(
+    candidate_name = "Kamala Harris",
+    support_ratio = num_harris  # Assuming harris_support_ratio is already calculated
+  ) %>%
+  select(end_date_num, candidate_name, support_ratio)
+
+# Prepare Trump data with a unified structure
+trump_data <- trumpdata %>%
+  mutate(
+    candidate_name = "Donald Trump",
+    support_ratio = num_trump  # Assuming trump_support_ratio is already calculated
+  ) %>%
+  select(end_date_num, candidate_name, support_ratio)
+
+# Combine both into a single data frame
+combined_data <- bind_rows(harris_data, trump_data)
+
+library(ggplot2)
+library(ggplot2)
+
+# Assuming `combined_data` contains columns `end_date_num`, `support_ratio`, and `candidate_name`
+
+ggplot(combined_data, aes(x = end_date_num, y = support_ratio, color = candidate_name, fill = candidate_name)) +
+  # Shaded area around each line for overlap visualization
+  geom_ribbon(data = combined_data %>% filter(candidate_name == "Kamala Harris"),
+              aes(ymin = support_ratio - 0.05, ymax = support_ratio + 0.05),
+              alpha = 0.3, fill = "red") +
+  geom_ribbon(data = combined_data %>% filter(candidate_name == "Donald Trump"),
+              aes(ymin = support_ratio - 0.05, ymax = support_ratio + 0.05),
+              alpha = 0.3, fill = "blue") +
+  
+  # Line plot for each candidate
+  geom_line(aes(group = candidate_name), size = 1) +
+  
+  scale_color_manual(values = c("Kamala Harris" = "red", "Donald Trump" = "blue")) +  # Set line colors
+  labs(
+    x = "Days Since Earliest Poll", 
+    y = "Support Ratio",
+    color = "Candidate",
+    title = "Support Ratio for Harris and Trump Over Time with Overlap Highlighted"
+  ) +
+  theme_minimal() +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(hjust = 0.5),
+    legend.position = "top",
+    legend.title = element_text(face = "bold")
+  )
+
+```
 # Discussion
 
 ## Arizona {#sec-arizona}
@@ -450,7 +573,6 @@ plot(first_model, "trace")
 plot(first_model, "rhat")
 ```
 
-<<<<<<< HEAD
 \newpage
 
 # Appendix 1
