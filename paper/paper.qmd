@@ -482,20 +482,18 @@ We project Georgia will vote for: **Donald Trump**
 ## Nevada {#sec-nevada}
 
 Nevada, primarily composed of desert and rural areas, sees its Democratic support concentrated in urban centers like Reno and Las Vegas compared to rural areas. The state has voted Democratic in the last four elections, with a 2% or greater margin in favor of Democratic candidates in the past two.
-Nevada has been a democratic state for the last 4 elections with at least a 2% difference in favor of the democrats in the last two elections @towin270.
+Nevada has been a democratic state for the last 4 elections with at least a 2% difference in favor of the democrats in the last two elections (@towin270).
 
-Interestingly enough, if we look at @fig-supportGNN we can see Nevada, similar to several other states had a spike in support of Harris in early September peaking north of 48% in the polls and their recent history of voting in favor of the democratic candidates. Nevertheless, Harris is seen to have had a gradual decline in the state stabilizing at around 46%, which which seems low in comparison to other states that are looking more favorably at Harris than Trump. Still, when we look at @fig-supportstate Harris is still has a marginal to Trump, considering all of these factors it is likely Harris will in fact take Nevada for the democrats.
+As seen in @fig-supportGNN, Harris experienced a spike in support in early September, peaking above 48%. Although her support gradually declined, stabilizing around 46%, @fig-supportstate still shows a marginal lead for Harris over Trump. Given Nevada’s recent voting history and current polling, it is probable that Nevada will support Harris (@towin270).
 
 We project Nevada will vote for: **Kamala Harris**
 
+
 ## North Carolina {#sec-norcar}
 
-North Carolina has been an exclusively Republican state since 1980, with a singular exception in 2008 when the state was democratic and voted for Obama. This means that North Carolina voted for Trump in th last two elections, in 2016 there was more significant win for the republican with 49.8% of the vote, with 46.2% going to the Democrats. While in 2020, the Republicans maintained their support from the state but the margin of victory was slimmer with them receiving 49.9% of the vote and Biden getting 48.8% @towin270.
+North Carolina has been an exclusively Republican state since 1980, with a singular exception in 2008 when the state was democratic and voted for Obama. Thus, North Carolina voted for Trump in the last two elections, where in 2016 there was a more significant win for Republicans with 49.8% of the vote, and 46.2% going to the Democrats. While in 2020, the Republicans maintained their support for the state but the margin of victory was slimmer with them receiving 49.9% of the vote and Biden getting 48.8% (@towin270).
 
-Now, if we look at @fig-supportGNN Harris had a spike in early September like many other states where she was polling around 48%, but afterwards had a minor but gradual decline 
-since. Although when we take a look at our model results in @fig-modelGANM we see that our prediction is that Harris's support is predicted to increase in North Carolina.
-
-North Carolina is a significantly difficult state to predict when we consider its Republican history, predicted support for Harris, and @fig-supportstate, where both candidates are neck and neck the chance for this state to go to either candidate is very up in the air.
+Looking at @fig-supportGNN, Harris had a spike in early September for some states where she was polling around 48%, but afterwards had a minor but gradual decline. However, our model results in @fig-modelGANM suggest a potential increase in Harris’s support over time. North Carolina remains challenging to predict due to its Republican history and the neck-and-neck nature of the race shown in @fig-supportstate, leaving the state’s outcome highly uncertain.
 
 We project North Carolina will vote for: **Donald Trump**
 
@@ -528,7 +526,7 @@ We project Wisconsin will vote for: **Kamala Harris**
 
 ## Electoral Vote Projection and Predicted Outcome
 
-Without considering the swing states and if we assume all the other states will vote as expected Kamala Harris has a slight lead of 226 electoral votes to Donald Trump's 219. Now, if we take the 43 combined votes of Arizona, Georgia, and North Carolina, and add it to Trumps tally. While allocate Nevada, Michigan, Pennsylvania, and Wisconsin's votes to Harris which sum up to 50 electoral votes. This totals to a Democratic victory for Kamala Harris at 276 votes to Donald Trump's 262, we have come to the conclusion that Kamala Harris is likely to win the upcomming United States election by 14 electoral votes. Below we have included an image of what we believee the electoral map will look after the election November 5th, @towin270:
+Without considering the swing states and if we assume all the other states will vote as expected Kamala Harris has a slight lead of 226 electoral votes to Donald Trump's 219. Now, if we take the 43 combined votes of Arizona, Georgia, and North Carolina, and add it to Trumps tally. While allocate Nevada, Michigan, Pennsylvania, and Wisconsin's votes to Harris which sum up to 50 electoral votes. This totals to a Democratic victory for Kamala Harris at 276 votes to Donald Trump's 262, we have come to the conclusion that Kamala Harris is likely to win the upcomming United States election by 14 electoral votes. Below we have included an image of what we believe the electoral map will look after the election November 5th, @towin270:
 
 
 ::: {.cell}
