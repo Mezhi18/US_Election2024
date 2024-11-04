@@ -1,4 +1,4 @@
-# Starter folder
+# Predicting the Winner of the 2024 USA elections
 
 ## Overview
 
@@ -10,7 +10,7 @@ This repo provides students with a foundation for their own projects associated 
 The repo is structured as:
 
 -   `data/raw_data` contains the raw data as obtained from X.
--   `data/analysis_data` contains the cleaned dataset that was constructed.
+-   `data/analysis_data` contains the cleaned dataset that was constructed. contains parquet too
 -   `model` contains fitted models. 
 -   `other` contains relevant literature, details about LLM chat interactions, and sketches.
 -   `paper` contains the files used to generate the paper, including the Quarto document and reference bibliography file, as well as the PDF of the paper. 
@@ -19,12 +19,4 @@ The repo is structured as:
 
 ## Statement on LLM usage
 
-Aspects of the code were written with the help of the auto-complete tool, Codriver. The abstract and introduction were written with the help of ChatHorse and the entire chat history is available in inputs/llms/usage.txt.
-
-## Some checks
-
-- [ ] Change the rproj file name so that it's not starter_folder.Rproj
-- [ ] Change the README title so that it's not Starter folder
-- [ ] Remove files that you're not using
-- [ ] Update comments in R scripts
-- [ ] Remove this checklist
+Aspects of the code were written with the help of ChatGPT. It was used to help with anything from finding inspiration for budget allocation, to graphing, to making correct citations. Sakura: https://chatgpt.com/share/67281e8a-c874-8012-a645-ad96b0616a6a. 
