@@ -530,6 +530,8 @@ Without considering the swing states and if we assume all the other states will 
 :::
 
 ## Limitations and Weaknesses
+
+There are several limitations and weaknesses thatcould have affected out research and statistical analysis. First, the variable ****
 - nuemric_grade couldve been used to weigh pollster results, for accuracy 
 - lack of real time adjustments 
 - less data to use becuase we are only considering data since Harris's declaration as a candidate 
