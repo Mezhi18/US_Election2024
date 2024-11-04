@@ -8,7 +8,11 @@ author:
 thanks: "Code and data are available at: [https://github.com/Mezhi18/US_Election2024.git](https://github.com/Mezhi18/US_Election2024.git)."
 date: today
 date-format: long
+<<<<<<< HEAD
 abstract: "We analyse the probability of Kamala Harris winning in the 7 swing states of USA using baysian modeling; Arizona, Michigan, Pennsylvania, Nevada, Georgia, Wisconsin, North Carolina. USA is a large country with its national economy affecting the global economic conditions, which is why predicting the future President of USA will help understand the future economic condiotion of the world. Through baysian modelling we found that North Carolina (47.26% support for Harris), Nevada(46.43% support for Harris), Wisconsin(48.38% support for Harris), Michigan(47.30% support for Harris), Pennsylvania(48.02% support for Harris) will vote Kamala Harris, while the rest of the swing states might vote Donald Trump, meaning that majority of the swing states will vote Kamala Harris. Provided this we predict that Kamal Harris will win the election. By creating a baysian model based on \"polls of polls \" where we compare the results from different polls, we are able to make this prediction. "
+=======
+abstract: "We analyse the probability of Kamala Harris winning in the 7 swing states of USA using baysian modeling; Arizona, Michigan, Pennsylvania, Nevada, Georgia, Wisconsin, North Carolina. USA is a large country with its national economy affecting the global economic conditions, which is why predicting the future President of the USA will help understand the future economic condiotion of the world. Through baysian modelling we found that North Carolina (47.26% support for Harris), Nevada(46.43% support for Harris), Michigan(47.30% support for Harris), Pennsylvania(48.02% support for Harris) will vote Kamala Harris, while the rest of the swing states might vote Donald Trump, meaning that majority of the swing states will vote Kamala Harris. Provided this we predict that Kamal Harris will win the election. By creating a baysian model based on \"polls of polls \" where we compare the results from different polls, we are able to make this prediction. "
+>>>>>>> 57364f8ad82f8162ece69b5fbd2982867a925de6
 format:
   pdf:
     bibliography: references.bib
@@ -34,7 +38,6 @@ library(rstanarm)
 library(knitr)
 ```
 
-
 # Introduction
 
 The 2024 United States presidential election represents a pivotal moment in the country's political landscape. As in previous elections, swing states are projected to play a critical role in determining the outcome. Swing states, which are characterized by their shifting voting patterns and balanced support for both major political parties, have historically been the focus of intense campaign efforts and polling analyses. Understanding the dynamics and voter preferences in these states is crucial to gaining insight into the broader electoral trends that could shape the nation's future.
@@ -54,23 +57,23 @@ The paper is structured with the introduction in the beginning followed by the D
 
 # Data {#sec-data}
 
-## Overview 
+## Overview
 
 As our paper is about the 2024 United States federal election and more specifically we are looking at the polling Data and the polling data comparing the two candidates, former President Donald Trump and Vice President Kamala Harris, for the upcoming election. Our original Data set had over 16,000 unique entries from different pollsters, the business or Organization that conducts the poll. Each poll has two entries, one giving the Data for the polling opinions of Donald Trump and the second for Kamala Harris. We have acquired our polling data from @fivethirtyeight2024
 
 As there are over 50 variables many of which are redundant to our paper we will only discuss those that we have kept in our clean data as they are the only ones we use in our analysis.
 
-- `pollster`: Shows name of the Pollster that conducted the poll.
-- `sample_size`: The number of people that participated in the specific poll.
-- `state`: This variable tells us in which States the poll was conducted.
-- `candidate_name`: This is the full name of the selected candidate.
-- `pct`: This tells us the percentage of participants that intend to vote for the selected candidate.
-- `end_date`: The date the pollster finished conducting the poll.
+-   `pollster`: Shows name of the Pollster that conducted the poll.
+-   `sample_size`: The number of people that participated in the specific poll.
+-   `state`: This variable tells us in which States the poll was conducted.
+-   `candidate_name`: This is the full name of the selected candidate.
+-   `pct`: This tells us the percentage of participants that intend to vote for the selected candidate.
+-   `end_date`: The date the pollster finished conducting the poll.
 
 The variables that we have create are:
 
-- `num_harris`: The number of participants that intend to vote for Kamala Harris.
-- `end_date_num`: The number of days since the first poll since Harris announced her candidacy, calculated using `end_date`. 
+-   `num_harris`: The number of participants that intend to vote for Kamala Harris.
+-   `end_date_num`: The number of days since the first poll since Harris announced her candidacy, calculated using `end_date`.
 
 Each pollster has a numeric grade from 1.0 to 3.0, which indicates the quality/ reliability of the respective pollster. Additionally, each pollster is also given a transparency score from 1.0 to 10.0 reflecting how 'transparent' the pollster is, or how much information is disclosed about its polls and methodology. It is important for pollsters to maintain high numeric grades and transparency scores because these metrics directly reflect the quality and reliability of their data. To ensure the highest level of accuracy in our predictions, we only include polls with a numeric grade of 1.5 or above and a transparency score of 6.0 or above.
 
@@ -78,8 +81,7 @@ Each pollster has a numeric grade from 1.0 to 3.0, which indicates the quality/ 
 
 We use the statistical programming language R [@citeR]. Our data comes from [@fivethirtyeight2024] and was cleaned, modeled and graphed, using @broom, @tidy, @rstanarm, @janitor, @lubr, @modelsummary.
 
-
-## Methodology and Measurement 
+## Methodology and Measurement
 
 This paper employs a "polls-of-polls" approach to analyze and predict our outcome, combining data from multiple pollsters. By integrating results from various sources, this method captures a broader range of perspectives, reducing the influence of individual biases and offering a more balanced view. Unlike relying on a single poll, which may be shaped by its unique methodological biases, the "polls-of-polls" approach enhances reliability and increases the overall validity of our predictions.
 
@@ -164,7 +166,7 @@ ggplot(plot_data, aes(x = state, y = support_percentage, fill = candidate)) +
   theme(axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1, size = 8))
 ```
 
-In this analysis, we examine polling trends for Kamala Harris across key swing states, focusing on recent polling data from Arizona, Georgia, Michigan, Nevada, North Carolina, Pennsylvania, and Wisconsin [CITE NYT PAPER]. As shown in @fig-supportstate, which displays the support percentages for both Harris and Donald Trump side-by-side by state, the data reveals a competitive race, with relatively close support levels for both candidates in most states. While Trump has a slight edge in Arizona, Georgia, and North Carolina, Harris maintains a modest lead in Michigan, Nevada, and Pennsylvania.
+In this analysis, we examine polling trends for Kamala Harris across key swing states, focusing on recent polling data from Arizona, Georgia, Michigan, Nevada, North Carolina, Pennsylvania, and Wisconsin \[CITE NYT PAPER\]. As shown in @fig-supportstate, which displays the support percentages for both Harris and Donald Trump side-by-side by state, the data reveals a competitive race, with relatively close support levels for both candidates in most states. While Trump has a slight edge in Arizona, Georgia, and North Carolina, Harris maintains a modest lead in Michigan, Nevada, and Pennsylvania.
 
 Moving to @fig-supportharris, which isolates Harris's support percentages across states, we gain insight into the consistency and variability of her support. The box plot highlights states like Wisconsin and Pennsylvania, where the smaller interquartile ranges indicate less variability, suggesting that Harris's support is more stable in these regions. Conversely, states such as Nevada and Georgia show greater variability, as reflected in the larger spread of the boxes and whiskers, indicating that Harris's support fluctuates more in these areas.
 
@@ -191,7 +193,7 @@ ggplot(harrisdata, aes(x = state, y = pct)) +
 
 To explore temporal trends, we introduce the variable `end_date_num`, representing the number of days since Harris declared her candidacy. The next figures examine support trends over time in individual states.
 
-```{r, fig.width= 6, fig.height= 2.5}
+```{r, fig.width= 6, fig.height= 2}
 #| echo: false
 #| warning: false
 #| message: false
@@ -217,7 +219,7 @@ ggplot(subset1, aes(x = end_date, y = pct, color = state)) +
 
 In @fig-supportWP, Pennsylvania and Wisconsin display distinct trends. In Pennsylvania, support for Harris has been relatively consistent since early September, stabilizing around 48.5%. In contrast, Wisconsin shows a peak in support in mid-September, followed by a gradual decline that stabilizes in October. These observations suggest that while Pennsylvania remains a consistent stronghold for Harris, Wisconsin’s voter sentiment may be more susceptible to fluctuations.
 
-```{r, fig.width= 6, fig.height= 2.5}
+```{r, fig.width= 6, fig.height= 2}
 #| echo: false
 #| warning: false
 #| message: false
@@ -241,6 +243,7 @@ ggplot(subset2, aes(x = end_date, y = pct, color = state)) +
   ) +
    theme(legend.position = "none")
 ```
+
 @fig-supportAM further examines Harris's support trends in Arizona and Michigan. Both states exhibit an upward trend in support starting in early October, which may suggest increasing favorability or strategic campaign efforts in these regions. This upward trajectory could indicate an opportunity for Harris to solidify her support in these competitive areas.
 
 ```{r, fig.width= 7, fig.height= 2.5}
@@ -269,7 +272,7 @@ ggplot(subset3, aes(x = end_date, y = pct, color = state)) +
 
 In @fig-supportGNN, we analyze Georgia, Nevada, and North Carolina. Nevada demonstrates the highest variability in Harris's support, which could reflect the state’s dynamic political response to recent campaign efforts. Georgia shows a steady upward trend, indicating growing support for Harris, while North Carolina reveals a slight decline since October, suggesting a possible shift in voter support.
 
-```{r, fig.width= 5, fig.height= 2.5}
+```{r, fig.width= 6, fig.height= 2}
 #| echo: false
 #| warning: false
 #| message: false
@@ -307,10 +310,9 @@ ggplot() +
 
 ```
 
-In @fig-supportpollsters, we examine the impact of pollster variability on Harris's support percentage over time. This visualization introduces the variable pollster, highlighting the differences in polling results that arise from varying methodologies. The chart reveals considerable fluctuations and occasional outliers in Harris' support, likely due to the distinct approaches each pollster employs in sampling and weighting responses. 
+In @fig-supportpollsters, we examine the impact of pollster variability on Harris's support percentage over time. This visualization introduces the variable pollster, highlighting the differences in polling results that arise from varying methodologies. The chart reveals considerable fluctuations and occasional outliers in Harris' support, likely due to the distinct approaches each pollster employs in sampling and weighting responses.
 
 Overall, these visualizations illustrate that Harris’s voter support is not only state-dependent but also fluctuates significantly over time. In particular, many states exhibit notable shifts around mid-September, pointing to potential influences from external events or campaign dynamics during this period. Furthermore, the observed variability across pollsters emphasizes the necessity of a robust model that can account for differences in pollster methodologies. By incorporating temporal patterns, state-specific characteristics, and pollster variability, our predictive model will aim to provide a more comprehensive and nuanced forecast of support for Harris in key regions, helping to isolate genuine shifts in public opinion from noise introduced by polling differences.
-
 
 ## Outcome and Predictor variables
 
@@ -320,14 +322,13 @@ In this analysis, our primary outcome variable is the support percentage for Kam
 
 To explain the outcome, we consider several predictor variables:
 
-1. **State**: Since support for candidates can vary significantly across different states due to regional demographics, political history, and local issues, the state variable allows us to capture these geographical differences. As shown in the earlier visualizations, some states demonstrate consistently higher or lower support for Harris, emphasizing the importance of including state-level distinctions in our analysis.
+1.  **State**: Since support for candidates can vary significantly across different states due to regional demographics, political history, and local issues, the state variable allows us to capture these geographical differences. As shown in the earlier visualizations, some states demonstrate consistently higher or lower support for Harris, emphasizing the importance of including state-level distinctions in our analysis.
 
-2. **Days Since Declaration**: Representing the number of days since Harris declared her candidacy, this temporal variable helps us capture shifts in voter sentiment over time. Our analysis reveals several critical points where support trends noticeably change, such as the upward or downward shifts in mid-September. This predictor allows the model to account for these temporal patterns and track how Harris’s support evolves as the campaign progresses.
+2.  **Days Since Declaration**: Representing the number of days since Harris declared her candidacy, this temporal variable helps us capture shifts in voter sentiment over time. Our analysis reveals several critical points where support trends noticeably change, such as the upward or downward shifts in mid-September. This predictor allows the model to account for these temporal patterns and track how Harris’s support evolves as the campaign progresses.
 
-3. **Pollster**: Given that different pollsters employ varied methodologies, sampling techniques, and weighting schemes, the pollster variable captures the potential variability introduced by each polling organization. As illustrated in @fig-supportpollsters, the results can vary considerably depending on the pollster, with some reporting notably higher or lower support percentages for Harris. By including pollster as a predictor, we aim to control for this source of variability, helping the model focus on underlying trends rather than discrepancies introduced by polling differences.
+3.  **Pollster**: Given that different pollsters employ varied methodologies, sampling techniques, and weighting schemes, the pollster variable captures the potential variability introduced by each polling organization. As illustrated in @fig-supportpollsters, the results can vary considerably depending on the pollster, with some reporting notably higher or lower support percentages for Harris. By including pollster as a predictor, we aim to control for this source of variability, helping the model focus on underlying trends rather than discrepancies introduced by polling differences.
 
 Each of these predictors provides a distinct layer of insight into Harris’s support trends. Together, they form the foundation of our predictive model, which will use these variables to more accurately forecast shifts in voter support and clarify the impact of state, time, and pollster methodology on public opinion.
-
 
 # Model
 
@@ -348,38 +349,35 @@ y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
 \sigma &\sim \mbox{Exponential}(1)
 \end{align}
 ```
-
 The outcome variable in this model is the proportion of respondents who support Harris in each poll, represented as $y_i$. This binomial outcome (successes out of the total sample size) is modeled as a function of several predictor variables that account for differences by state, pollster, and time.
 
-- $y_i$ is the dependent variable, representing the proportion of respondents who support Harris.
-- $\beta_0$: The intercept term, representing the expected proportion of $y_i$ when all other predictors are set to zero.
-- **State** ($\beta_1$): Categorical variable that accounts for differences in support across seven key swing states.
-- **Pollster** ($\beta_2$): Categorical variable capturing variability introduced by the polling organization.
-- **Days since first poll** ($\beta_3$): Numeric variable representing the number of days since Harris declared her candidacy.
+-   $y_i$ is the dependent variable, representing the proportion of respondents who support Harris.
+-   $\beta_0$: The intercept term, representing the expected proportion of $y_i$ when all other predictors are set to zero.
+-   **State** ($\beta_1$): Categorical variable that accounts for differences in support across seven key swing states.
+-   **Pollster** ($\beta_2$): Categorical variable capturing variability introduced by the polling organization.
+-   **Days since first poll** ($\beta_3$): Numeric variable representing the number of days since Harris declared her candidacy.
 
-Each coefficient $\beta$ follows the normal distribution with a mean of 0 and a standard deviation of 2.5, providing some regularization while allowing for a range of possible effects. The standard deviation $\sigma$ is given an Exponential(1) prior, which constrains it to positive values and provides a realistic expectation of variability around the mean 
-Each predictor captures a unique dimension of voter sentiment:
+Each coefficient $\beta$ follows the normal distribution with a mean of 0 and a standard deviation of 2.5, providing some regularization while allowing for a range of possible effects. The standard deviation $\sigma$ is given an Exponential(1) prior, which constrains it to positive values and provides a realistic expectation of variability around the mean Each predictor captures a unique dimension of voter sentiment:
 
-- **State** accounts for regional differences in support due to factors like demographics and political history.
-- **Pollster** adjusts for methodological variations in polling, which we observed to influence support percentages.
-- **Days Since Declaration** captures temporal trends, allowing the model to incorporate fluctuations in voter sentiment over the campaign period.
+-   **State** accounts for regional differences in support due to factors like demographics and political history.
+-   **Pollster** adjusts for methodological variations in polling, which we observed to influence support percentages.
+-   **Days Since Declaration** captures temporal trends, allowing the model to incorporate fluctuations in voter sentiment over the campaign period.
 
 By combining these predictors, the model aims to forecast Harris’s support by isolating genuine trends from random variability.
 
 ### Model justification
 
-Based on the data overview in @sec-graphs, we observe that Harris’s support varies across key swing states, and we expect these regional differences to influence our model's predictions. The state variable is anticipated to capture these geographic variations, with states like Arizona, Michigan, Georgia, and Pennsylvania showing relatively consistent high levels of support for Harris. In contrast, Nevada, North Carolina, and Wisconsin exhibit a declining trend in support. We expect the intercept to be around 50%, as this reflects the average level of support observed across all states and pollsters. 
+Based on the data overview in @sec-graphs, we observe that Harris’s support varies across key swing states, and we expect these regional differences to influence our model's predictions. The state variable is anticipated to capture these geographic variations, with states like Arizona, Michigan, Georgia, and Pennsylvania showing relatively consistent high levels of support for Harris. In contrast, Nevada, North Carolina, and Wisconsin exhibit a declining trend in support. We expect the intercept to be around 50%, as this reflects the average level of support observed across all states and pollsters.
 
 A model validation is included in `scripts/05-exploratory_data_analysis.R`, and a Posterior Predictive Check and summary statistics for the model are included in @sec-checks.
 
-## Model Results 
+## Model Results
 
 The model predicts an average support percentage of approximately 47.33% for Kamala Harris across the selected states. This percentage reflects the central tendency of predicted support within the dataset, factoring in the influence of state, pollster, and the number of days since the first poll.
 
-The results indicate variations in predicted support across states. For instance, Pennsylvania and Wisconsin show the highest average predicted support percentages (48.02% and 48.38%, respectively), while states like Nevada and Arizona display slightly lower support. 
+The results indicate variations in predicted support across states. For instance, Pennsylvania and Wisconsin show the highest average predicted support percentages (48.02% and 48.38%, respectively), while states like Nevada and Arizona display slightly lower support.
 
-In states like Arizona, Georgia, Michigan, and North Carolina, the model predicts a steady increase in support for Harris over time, as shown in @fig-modelGAWM.
-In states such as Nevada, Pennsylvania, and Wisconsin, the model predicts a decline in support over time, as seen in @fig-modelNPW.
+In states like Arizona, Georgia, Michigan, and North Carolina, the model predicts a steady increase in support for Harris over time, as shown in @fig-modelGAWM. In states such as Nevada, Pennsylvania, and Wisconsin, the model predicts a decline in support over time, as seen in @fig-modelNPW.
 
 ```{r}
 #| echo: false
@@ -414,7 +412,8 @@ ggplot(subset_up, aes(x = end_date_num, y = median_prob, color = state)) +
   theme(legend.position = "none")
 
 ```
-In @fig-modelNPW, we see states of Nevada, Pennsylvania and Wisconsin have a singular declining trend. 
+
+In @fig-modelNPW, we see states of Nevada, Pennsylvania and Wisconsin have a singular declining trend.
 
 ```{r}
 #| echo: false
@@ -440,9 +439,7 @@ ggplot(subset_down, aes(x = end_date_num, y = median_prob, color = state)) +
 
 ```
 
-
 CONFIDENCE INTERVAL TABLE ??
-
 
 ```{r}
 #| echo: false
@@ -468,6 +465,7 @@ predicted_support_table <- harrisdata %>%
 
 kable(predicted_support_table, col.names = c("State", "Avg. Predicted Support for Harris"), digits = 2)
 ```
+
 ```{r}
 
 
@@ -477,12 +475,7 @@ The goal of our modelling strategy is twofold. Firstly,...
 
 Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
 
-
-
 # Results
-
-
-
 
 # Discussion
 
@@ -518,17 +511,15 @@ We believe Michigan will vote for: **Kamala Harris**
 
 ## Pennsylvania {#sec-penn}
 
-Pennsylvania is an interesting for several reasons, the first is that before Tim Walz was announced as Kamala Harris's running mate, one of the speculated candidates was Josh Shapiro, the current governor of Pennsylvania, which presidential candidates often consider from where their potential running mates are from as they tend to help with swing states nevertheless, she did not choose Shapiro as her running mate and this is no longer a factor. 
+Pennsylvania is an interesting for several reasons, the first is that before Tim Walz was announced as Kamala Harris's running mate, one of the speculated candidates was Josh Shapiro, the current governor of Pennsylvania, which presidential candidates often consider from where their potential running mates are from as they tend to help with swing states nevertheless, she did not choose Shapiro as her running mate and this is no longer a factor.
 
-Second, Similarly to Nevada and Michigan Pennsylvania Voted for Trump in 2016 with a 48.2% to a 47.5% victory, and for Biden in 2020 with a slightly more significant but not overwhelming victory at 50% to 48.8%. 2016 was the first time Pennsylvania voted for a republican candidate since 1988. 
+Second, Similarly to Nevada and Michigan Pennsylvania Voted for Trump in 2016 with a 48.2% to a 47.5% victory, and for Biden in 2020 with a slightly more significant but not overwhelming victory at 50% to 48.8%. 2016 was the first time Pennsylvania voted for a republican candidate since 1988.
 
-Lastly, if we consider @fig-supportWP we see that harris has been polling at a consistent 48% since mid september which is somewhat similar to Georgia, while Pennsylvania seems to be leaning more democratic than republican than Georgia.@fig-supportGNN, they have both similarly increased their interest in Harris since the polling began until mid september which is when they both becan to plateau at their current polling numbers.
+Lastly, if we consider @fig-supportWP we see that harris has been polling at a consistent 48% since mid september which is somewhat similar to Georgia, while Pennsylvania seems to be leaning more democratic than republican than Georgia.\@fig-supportGNN, they have both similarly increased their interest in Harris since the polling began until mid september which is when they both becan to plateau at their current polling numbers.
 
 We believe Pennsylvania will vote: **Kamala Harris**
 
 ## Wisconsin {#sec-wisconsin}
-
-
 
 ## Weaknesses and next steps
 
@@ -544,17 +535,22 @@ Why we choose NYT? - `numeric_grade` is 3 - `pollscore` is -1.5, a score of reli
 
 # Appendix 2
 
-Here we will be talking about how we would conduct a $100,000 surevey to gather data about this upcoming election to ensure there is minimal error in the data we are collecting and, our data represents the facts we want them to represent. 
-Out of the \$100,000 we will allocate \$15000 for the necessary development and administration of the data. This means we will be spending this money to create the survey, and have a infrastructure in place to hold the large amount of data as well as cover any security fees to keep this data private and safe. Then we allocate $50000 to advertise the survey. We will need a large sample so we will be spending most of our budget for this. We will have a different urls for each advertisement we have so that we can incorporate this in our data to see which demographic is accessing the survey through which platform. The platforms to advertise this is through spotify, facebook, instagram, and some news networks. If possible we will try to use this money to get it endorsed by branches of government to show our reliability. Reliability is also what citizens respond to so this will get a lot of respondents. We will spend \$25,000 for modeling our data as they tend to be expensive with data this size. And the rest of the \$15,000 will be leftover cost for anything that we don't foresee. If there is any leftover we can add a survey participation price such as having a free 3 month trial for the platforms we mentioned above (that is if they have a subscription based membership). 
+Here we will be talking about how we would conduct a \$100,000 surevey to gather data about this upcoming election to ensure there is minimal error in the data we are collecting and, our data represents the facts we want them to represent. Out of the \$100,000 we will allocate \$15000 for the necessary development and administration of the data. This means we will be spending this money to create the survey, and have a infrastructure in place to hold the large amount of data as well as cover any security fees to keep this data private and safe. Then we allocate \$50000 to advertise the survey. We will need a large sample so we will be spending most of our budget for this. We will have a different urls for each advertisement we have so that we can incorporate this in our data to see which demographic is accessing the survey through which platform. The platforms to advertise this is through spotify, facebook, instagram, and some news networks. If possible we will try to use this money to get it endorsed by branches of government to show our reliability. Reliability is also what citizens respond to so this will get a lot of respondents. We will spend \$25,000 for modeling our data as they tend to be expensive with data this size. And the rest of the \$15,000 will be leftover cost for anything that we don't foresee. If there is any leftover we can add a survey participation price such as having a free 3 month trial for the platforms we mentioned above (that is if they have a subscription based membership).
 
-We will not be using telephone surveys because according to reserach [@idSurvey] we find the most people, don't pick up calls from unknown numbers and even the people that pick it up they are less inclined to answer the questions of the survey. 
+We will not be using telephone surveys because according to reserach [@idSurvey] we find the most people, don't pick up calls from unknown numbers and even the people that pick it up they are less inclined to answer the questions of the survey.
 
+<<<<<<< HEAD
 Next to look at the actual contents of the survey. They can be accessed through this link: [Sample survey question](https://forms.office.com/Pages/ResponsePage.aspx?id=JsKqeAMvTUuQN7RtVsVSEL7G89G56QlHp_qqIPzGbJdUME9UQzJaWUlCVldZTktRV09UQ0Q3N0hQRi4u). There are 3 things that we were careful of when we were creating this survey. First thing we considered was transperency. People need the reassurance that the data that is being collected will not be used against them, and so we feel them what data we do collect and how the data we collect cannot be used to identify a person. The second thing we focus on is readability of the questions. We tried to make them as simple as possible using accessibile language, and tried to keep it short as well (@Tourangeau_Rips_Rasinski_2000). We also prioritised the size of the survey. We kept it to a short 11 questions that will tell us their political standing in the past and present. We know what current issues are important to them as well as their age group and the state they are from. This will help us gather data without inconveniencing the person. There are disadvanatages to the way we structured the survey. For example, we were keeping time and security in mind, so we restricted the survey to 11 questions, however, this limits the amount of answers we get from the reader. We may be missing some crucial information that helps us figure out which group of people may vote for whom, such as ethnicity and wages (@annurev). 
 
 Finally we take a look at how we sample from the gathered data. We thought about random sampling but we were worried about having unequal proportions of the demographic we would advertise to. So if more people that go to facebook responded, that doesn't necessarily mean that people use facebook more than the other platforms. So we we decided to combine stratified and cluster  sampling(@annurev). The idea is that we will choose based on the different platforms we advertise to first to have a cluster sampling method. And then we will sample the data by dividing the people by the certain aspects of the surevy, like if they are in different age groups or if they are registered voters. This is called Stratified Sampling (@annurev). Then we take a union of all the samples and we gather a group that we are able to build models based off of.
 There are obvious disadvantages as well. For example, we have fewer questions meaning when we sample based on the question we might have cases where, some groups are over or under represented. This can happen for example when most of the people who answered might be from age 18-50 because those are the age groups with access to a phone and are frequently visiting the sites we advertise our survey on. Also the different apps may skew the data as Facebook has a older audience as opposed to Instagram and Tiktok. Another disadvantage is the fact that we have 2 different sampling methods that we use and we combine them both, meaning that this can be an expensive process. Doing so may exceed the allocated budget however, it will be worth it because we minimize the sampling bias we talk about earlier where we may have a group that has more access to the survey. The last disadvantage we also foresee is the fact that younger audience may not be as interested in filling out a survey about politics as they feel, it might not directly affect them. We try to minimize this by offering compensation for their time when they fill out the survey, i.e. free membership services for 3 months on Spotify. 
 
 Although there are both advatages and disadvantages, we feel that this survey is well though out and doesn't allow for ambiguity in the answers of the participants. 
+=======
+Next to look at the actual contents of the survey. They can be accessed through this link:[Sample survey question](https://forms.office.com/Pages/ResponsePage.aspx?id=JsKqeAMvTUuQN7RtVsVSEL7G89G56QlHp_qqIPzGbJdUME9UQzJaWUlCVldZTktRV09UQ0Q3N0hQRi4u). There are 3 things that we were careful of when we were creating this survey. First thing we considered was transperency. People need the reassurence that the data that is being collected will not be used against them, and so we teel them what data we do collect and how the data we collect cannot be used to identify a person. The second thing we focus on is readability of the questions. We tried to make them as simple as possible using accessibile language, and tried to keep it short as well (@Tourangeau_Rips_Rasinski_2000). We also prioritised the size of the survey. We kept it to a short 11 questions that will tell us their political standing in the past and present. We know what current issues are important to them as well as their age group and the state they are from. This will help us gather data without inconveniencing the person.
+
+Finally we take a look at how we sample from the gathered data. We thought about random sampling but we were worried about having unequal proportions of the demographic we would advertise to. So if more people that go to facebook responded, that doesn't necessairly mean that people use facebook more than the other platforms. So we we decided to combine startified and cluster sampling(@annurev). The idea is that we will choose based on the different platforms we advertise to first to have a cluster sampling method. And then we will sample the data by dividing the people by the certain aspects of the surevy, like if they are in different age groups or if they are registered voters. This is called Stratified Sampling (@annurev). Then we take a union of all the samples and we gather a group that we are able to build models based off of.
+>>>>>>> 57364f8ad82f8162ece69b5fbd2982867a925de6
 
 # Appendix 3 - checks and summary stats {#sec-checks}
 
