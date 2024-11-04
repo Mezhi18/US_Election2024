@@ -28,10 +28,10 @@ library(tidyverse)
 library(dplyr)
 library(janitor)
 library(lubridate)
-library(broom)
 library(modelsummary)
 library(rstanarm)
 library(knitr)
+library(bayesplot)
 ```
 
 
@@ -73,9 +73,7 @@ The variables that we have create are:
 
 Each pollster has a numeric grade from 1.0 to 3.0, which indicates the quality/ reliability of the respective pollster. Additionally, each pollster is also given a transparency score from 1.0 to 10.0 reflecting how 'transparent' the pollster is, or how much information is disclosed about its polls and methodology. It is important for pollsters to maintain high numeric grades and transparency scores because these metrics directly reflect the quality and reliability of their data. To ensure the highest level of accuracy in our predictions, we only include polls with a numeric grade of 1.5 or above and a transparency score of 6.0 or above.
 
-¿ does this go into data cleaning ?
-
-We use the statistical programming language R [@citeR]. Our data comes from [@fivethirtyeight2024] and was cleaned, modeled and graphed, using @broom, @tidy, @rstanarm, @janitor, @lubr, @modelsummary.
+We use the statistical programming language R [@citeR] to compile this paper. Our data comes from [@fivethirtyeight2024] and was cleaned and visualized using the packages Tidyverse [@tidy], Lubridate [@lubr], Janitor [@janitor], and Knitr [@knitr] and modeled using Rstanarm [@rstanarm], ModelSummary [@modelsummary] and BayesPlot [@bayesplot].
 
 
 ## Methodology and Measurement 
@@ -163,7 +161,7 @@ ggplot(plot_data, aes(x = state, y = support_percentage, fill = candidate)) +
   theme(axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1, size = 8))
 ```
 
-In this analysis, we examine polling trends for Kamala Harris across key swing states, focusing on recent polling data from Arizona, Georgia, Michigan, Nevada, North Carolina, Pennsylvania, and Wisconsin [CITE NYT PAPER]. As shown in @fig-supportstate, which displays the support percentages for both Harris and Donald Trump side-by-side by state, the data reveals a competitive race, with relatively close support levels for both candidates in most states. While Trump has a slight edge in Arizona, Georgia, and North Carolina, Harris maintains a modest lead in Michigan, Nevada, and Pennsylvania.
+In this analysis, we examine polling trends for Kamala Harris across key swing states, focusing on recent polling data from Arizona, Georgia, Michigan, Nevada, North Carolina, Pennsylvania, and Wisconsin [@NYTswingatates]. As shown in @fig-supportstate, which displays the support percentages for both Harris and Donald Trump side-by-side by state, the data reveals a competitive race, with relatively close support levels for both candidates in most states. While Trump has a slight edge in Arizona, Georgia, and North Carolina, Harris maintains a modest lead in Michigan, Nevada, and Pennsylvania.
 
 Moving to @fig-supportharris, which isolates Harris's support percentages across states, we gain insight into the consistency and variability of her support. The box plot highlights states like Wisconsin and Pennsylvania, where the smaller interquartile ranges indicate less variability, suggesting that Harris's support is more stable in these regions. Conversely, states such as Nevada and Georgia show greater variability, as reflected in the larger spread of the boxes and whiskers, indicating that Harris's support fluctuates more in these areas.
 
@@ -489,7 +487,7 @@ We believe Georgia will vote: **Donald Trump**
 
 Nevada is a state who's majority is dessert and wilderness, with two large cities being Reno and Las Vegas, as the case is with many states a Majority of democratic votes come from large cities and the majority of republican votes coming from rural areas. Nevada has been a democratic state for the last 4 elections with at least a 2% difference in favor of the democrats in the last two elections.
 
-Interestingly enough, if we look at @fig-supportGNN we can see Nevada, similar to several other states had a spike in support of Harris in early September peaking north of 48% in the polls and their recent history of voting in favor of the democratic candidates. Nevertheless, Harris is seen to have had a gradual decline in the state stabilizing at around 46%, which which seems low in comparison to other states that are looking more favorably at Harris than Trump. Still, when we look at @supportstate Harris is still has a marginal to Trump, considering all of these factors it is likely Harris will in fact take Nevada for the democrats.
+Interestingly enough, if we look at @fig-supportGNN we can see Nevada, similar to several other states had a spike in support of Harris in early September peaking north of 48% in the polls and their recent history of voting in favor of the democratic candidates. Nevertheless, Harris is seen to have had a gradual decline in the state stabilizing at around 46%, which which seems low in comparison to other states that are looking more favorably at Harris than Trump. Still, when we look at @fig-supportstate Harris is still has a marginal to Trump, considering all of these factors it is likely Harris will in fact take Nevada for the democrats.
 
 We believe Nevada will vote: **Kamala Harris**
 
@@ -514,7 +512,6 @@ We believe Pennsylvania will vote: **Kamala Harris**
 ## Wisconsin {#sec-wisconsin}
 
 
-
 ## Weaknesses and next steps
 
 Weaknesses and next steps should also be included.
@@ -527,7 +524,7 @@ Weaknesses and next steps should also be included.
 
 The New York Times/Siena College Poll is a respected polling partnership that provides data-driven insights into U.S. public opinion, particularly on political, social, and economic issues. Known for its rigorous methodology, this poll focuses on capturing the views of registered and likely voters across the country, with particular emphasis on key battleground states during election cycles. The poll is frequently cited for its accuracy and transparency, and is widely regarded as reliable by the public, political analysts, and the media.
 
-The New York Times/Siena College Poll is conducts live telephone interviews with a national sample of registered voters, using both landlines and cellphones, with over 90% of contacts made via cellphones. The sample frame is drawn from a comprehensive voter file covering 200 million registered voters. This file provides demographic and geographic information, enabling representative sampling across age, race, and political affiliation. The poll targets registered U.S. voters, with special focus on battleground states like Arizona, Georgia, Michigan, Nevada, Pennsylvania, and Wisconsin, determined as swing states. Respondents are randomly selected from the voter file, ensuring a diverse sample by region, party, and demographics. To mitigate non-response bias, the poll applies demographic weighting, increasing the weight of underrepresented groups, such as young adults or non-college graduates. Low response rates (around 2%) present challenges, to mitigate this, weighing adjustments are applied to correct for demographic imbalances and potential non-response bias. Questions are structured to be clear, neutral, and representative across political views, with each question carefully reviewed for balance and clarity. This process reduces the risk of bias in responses, though the brief format of phone surveys limits depth.
+The New York Times/Siena College Poll is conducts live telephone interviews with a national sample of registered voters, using both landlines and cellphones, with over 90% of contacts made via cellphones. The sample frame is drawn from a comprehensive voter file covering 200 million registered voters. This file provides demographic and geographic information, enabling representative sampling across age, race, and political affiliation. The poll targets registered U.S. voters, with special focus on battleground states like Arizona, Georgia, Michigan, Nevada, Pennsylvania, and Wisconsin, determined as swing states. Respondents are randomly selected from the voter file, ensuring a diverse sample by region, party, and demographics. To mitigate non-response bias, the poll applies demographic weighting, increasing the weight of underrepresented groups, such as young adults or non-college graduates. Low response rates (around 2%) present challenges, to mitigate this, weighing adjustments are applied to correct for demographic imbalances and potential non-response bias. Questions are structured to be clear, neutral, and representative across political views, with each question carefully reviewed for balance and clarity. This process reduces the risk of bias in responses, though the brief format of phone surveys limits depth (@NYTpolls).
 
 
 # Appendix 2 - Survey
@@ -547,7 +544,7 @@ Although there are both advatages and disadvantages, we feel that this survey is
 
 # Appendix 3- Posterior Predictive Check {#sec-checks}
 
-```{r}
+```{r, fig.width=5, fig.height=3}
 #| echo: false
 #| warning: false
 #| message: false
@@ -559,7 +556,7 @@ pp_check(bay_model)
 
 ```
 
-In @fig-ppcheck, we check the Posterior predictive check of model of our model. Since the raw data aligns closely with our prdictions, our model is a good predicton of the data.
+In @fig-ppcheck, we check the Posterior predictive check of model of our model. Since the raw data aligns closely with our predictions, our model is a good prediction of the data.
 
 \newpage
 
