@@ -1,13 +1,14 @@
 ---
-title: "My title"
-subtitle: "My subtitle if needed"
+title: "Will Kamala Harris will win the 2024 Presidential election"
+subtitle: "Analysing the polls using baysian modeling"
 author: 
-  - First author
-  - Another author
+  - Yan Mezhiborsky
+  - Cristina Burca
+  - Shreya Sakura Noskor
 thanks: "Code and data are available at: [https://github.com/Mezhi18/US_Election2024.git](https://github.com/Mezhi18/US_Election2024.git)."
 date: today
 date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "We analyse the probability of Kamala Harris winning in the 7 swing states of USA using baysian modeling; Arizona, Michigan, Pennsylvania, Nevada, Georgia, Wisconsin, North Carolina. USA is a large country with its national economy affecting the global economic conditions, which is why predicting the future President of USA will help understand the future economic condiotion of the world. Through baysian modelling we found that North Carolina (47.26% support for Harris), Nevada(46.43% support for Harris), Michigan(47.30% support for Harris), Pennsylvania(48.02% support for Harris) will vote Kamala Harris, while the rest of the swing states might vote Donald Trump, meaning that majority of the swing states will vote Kamala Harris. Provided this we predict that Kamal Harris will win the election. By creating a baysian model based on \"polls of polls \" where we compare the results from different polls, we are able to make this prediction. "
 format:
   pdf:
     bibliography: references.bib

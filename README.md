@@ -1,9 +1,7 @@
 # Predicting the Winner of the 2024 USA elections
 
 ## Overview
-
-This repo provides students with a foundation for their own projects associated with *Telling Stories with Data*. You do not need every aspect for every paper and you should delete aspects that you do not need.
-
+We analyse the probability of Kamala Harris winning in the 7 swing states of USA using baysian modeling; Arizona, Michigan, Pennsylvania, Nevada, Georgia, Wisconsin, North Carolina. USA is a large country with its national economy affecting the global economic conditions, which is why predicting the future President of USA will help understand the future economic condiotion of the world. Through baysian modelling we found that North Carolina (47.26% support for Harris), Nevada(46.43% support for Harris), Michigan(47.30% support for Harris), Pennsylvania(48.02% support for Harris) will vote Kamala Harris, while the rest of the swing states might vote Donald Trump, meaning that majority of the swing states will vote Kamala Harris. Provided this we predict that Kamal Harris will win the election. By creating a baysian model based on "polls of polls " where we compare the results from different polls, we are able to make this prediction. 
 
 ## File Structure
 
