@@ -50,7 +50,7 @@ Telegraphing paragraph: The remainder of this paper is structured as follows. @s
 
 # Data {#sec-data}
 
-## Overview
+## Overview 
 
 As our paper is about the 2024 United States federal election and more specifically we are looking at the polling Data and the polling data comparing the two candidates, former President Donald Trump and Vice President Kamala Harris, for the upcoming election. Our original Data set had over 16,000 unique entries from different pollsters, the business or Organization that conducts the poll. Each poll has two entries, one giving the Data for the polling opinions of Donald Trump and the second for Kamala Harris. We have acquired our polling data from @fivethirtyeight2024
 
@@ -82,7 +82,7 @@ This paper uses 'polls-of-polls' method to analyze and predict our outcome, whic
 
 ... explain how pollsters survey people, what their different methodologies are, and why these things are important for an accurate prediction...
 
-## Measurement/ Data Visualization 
+## Measurement/ Data Visualization {#sec-graphs}
 
 ```{r}
 #| include: false
@@ -100,7 +100,7 @@ preddata <- data %>%
   filter(!is.na(state) & state != "")
 ```
 
-```{r, fig.height= 3}
+```{r, fig.height= 2.5}
 #| echo: false
 #| warning: false
 #| message: false
@@ -116,8 +116,7 @@ harrisdata <- preddata %>%
   mutate(num_harris = round((pct / 100) * sample_size, 0))
 
 harrisdata <- harrisdata %>%
-  mutate(
-    end_date_num = as.numeric(end_date - min(end_date)),
+  mutate(end_date_num = as.numeric(end_date - min(end_date)),
         state = factor(state))
 
 trumpdata <- preddata %>%
@@ -131,8 +130,7 @@ combined_data <- harrisdata %>%
   inner_join(trumpdata, by = c("state", "pollster", "sample_size", "end_date")) %>%
   mutate(
     harris_percentage = (num_harris / sample_size) * 100,
-    trump_percentage = (num_trump / sample_size) * 100
-  )
+    trump_percentage = (num_trump / sample_size) * 100)
 
 
 time_series_data <- combined_data %>%
@@ -142,21 +140,19 @@ time_series_data <- combined_data %>%
                values_to = "support_percentage") %>%
   mutate(candidate = ifelse(candidate == "harris_percentage", "Harris", "Trump"))
 
-# Plotting the support percentages side-by-side for each state
 plot_data <- combined_data %>%
   pivot_longer(cols = c(harris_percentage, trump_percentage),
                names_to = "candidate",
                values_to = "support_percentage") %>%
   mutate(candidate = ifelse(candidate == "harris_percentage", "Harris", "Trump"))
 
-# Plotting the support percentages side-by-side for each state
 ggplot(plot_data, aes(x = state, y = support_percentage, fill = candidate)) +
   geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
   labs(,
     x = "State",
     y = "Support Percentage"
   ) +
-  scale_fill_manual(values = c("Harris" = "blue", "Trump" = "red"), name = "Candidate") +
+  scale_fill_manual(values = c("Harris" = "deepskyblue2", "Trump" = "tomato1"), name = "Candidate") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1, size = 8))
 ```
@@ -165,7 +161,7 @@ In this analysis, we examine polling trends for Kamala Harris across key swing s
 
 Moving to @fig-supportharris, which isolates Harris's support percentages across states, we gain insight into the consistency and variability of her support. The box plot highlights states like Wisconsin and Pennsylvania, where the smaller interquartile ranges indicate less variability, suggesting that Harris's support is more stable in these regions. Conversely, states such as Nevada and Georgia show greater variability, as reflected in the larger spread of the boxes and whiskers, indicating that Harris's support fluctuates more in these areas.
 
-```{r, fig.height= 4, fig.width= 6}
+```{r, fig.height= 3.5, fig.width= 6.5}
 #| echo: false
 #| warning: false
 #| message: false
@@ -176,32 +172,28 @@ harrisdata <- harrisdata %>%
   filter(candidate_name == "Kamala Harris") %>%
   mutate(end_date = as.Date(end_date, format = "%Y-%m-%d"))
 
-# Plot showing the variation in Harris's support percentages by pollster within each state
 ggplot(harrisdata, aes(x = state, y = pct)) +
-  geom_boxplot(aes(fill = state), alpha = 0.6, outlier.shape = NA) +  # Boxplot to show spread by pollster within each state
-  geom_jitter(aes(color = state), width = 0.2, alpha = 0.4) +  # Adds individual points with jitter to show individual poll results
+  geom_boxplot(aes(fill = state), alpha = 0.6, outlier.shape = NA) + 
+  geom_jitter(aes(color = state), width = 0.2, alpha = 0.4) + 
   labs(
     x = "State",
-    y = "Support Percentage"
-  ) +
+    y = "Support Percentage") +
   theme_minimal() +
   theme(legend.position = "none") 
 ```
 
 To explore temporal trends, we introduce the variable `end_date_num`, representing the number of days since Harris declared her candidacy. The next figures examine support trends over time in individual states.
 
-
-```{r, fig.width= 6, fig.height= 3}
+```{r, fig.width= 6, fig.height= 2.5}
 #| echo: false
 #| warning: false
 #| message: false
 #| label: fig-supportWP
 #| fig-cap:  "Support Percentage for Harris by State since Harris declared as Candidate for Wisconsin and Pennsylvania"
 
-# Filter for a subset of states to plot separately
+
 subset1 <- harrisdata %>% filter(state %in% c("Wisconsin", "Pennsylvania"))
 
-# Plot the first subset
 ggplot(subset1, aes(x = end_date, y = pct, color = state)) +
   geom_point() +
   geom_smooth(se = TRUE) +
@@ -209,16 +201,16 @@ ggplot(subset1, aes(x = end_date, y = pct, color = state)) +
   labs(y = "Harris Percent", x = "Date") +
   theme_minimal() +
     scale_x_date(
-    date_breaks = "1 month",            # Set major breaks at monthly intervals
-    date_minor_breaks = "1 week",       # Optional: add minor weekly breaks for granularity
-    date_labels = "%b %d"               # Format to show abbreviated month and day (e.g., "Aug 01")
-  ) +
+    date_breaks = "1 month",           
+    date_minor_breaks = "1 week",     
+    date_labels = "%b %d" ) +
    theme(legend.position = "none")
 
 ```
+
 In @fig-supportWP, Pennsylvania and Wisconsin display distinct trends. In Pennsylvania, support for Harris has been relatively consistent since early September, stabilizing around 48.5%. In contrast, Wisconsin shows a peak in support in mid-September, followed by a gradual decline that stabilizes in October. These observations suggest that while Pennsylvania remains a consistent stronghold for Harris, Wisconsin’s voter sentiment may be more susceptible to fluctuations.
 
-```{r, fig.width= 6, fig.height= 3}
+```{r, fig.width= 6, fig.height= 2.5}
 #| echo: false
 #| warning: false
 #| message: false
@@ -244,7 +236,7 @@ ggplot(subset2, aes(x = end_date, y = pct, color = state)) +
 ```
 @fig-supportAM further examines Harris's support trends in Arizona and Michigan. Both states exhibit an upward trend in support starting in early October, which may suggest increasing favorability or strategic campaign efforts in these regions. This upward trajectory could indicate an opportunity for Harris to solidify her support in these competitive areas.
 
-```{r, fig.width= 7, fig.height= 3}
+```{r, fig.width= 7, fig.height= 2.5}
 #| echo: false
 #| warning: false
 #| message: false
@@ -267,9 +259,10 @@ ggplot(subset3, aes(x = end_date, y = pct, color = state)) +
   ) +
    theme(legend.position = "none")
 ```
+
 In @fig-supportGNN, we analyze Georgia, Nevada, and North Carolina. Nevada demonstrates the highest variability in Harris's support, which could reflect the state’s dynamic political response to recent campaign efforts. Georgia shows a steady upward trend, indicating growing support for Harris, while North Carolina reveals a slight decline since October, suggesting a possible shift in voter support.
 
-```{r, fig.width= 6, fig.height= 3}
+```{r, fig.width= 5, fig.height= 2.5}
 #| echo: false
 #| warning: false
 #| message: false
@@ -287,7 +280,7 @@ pollster_summary <- harrisdata %>%
 
 ggplot() +
   # Draw a line for each pollster from first to last poll
-  geom_line(data = harrisdata %>% group_by(pollster) %>% filter(n() > 1), 
+  geom_point(data = harrisdata %>% group_by(pollster) %>% filter(n() > 1), 
             aes(x = end_date_num, y = pct, group = pollster, color = pollster), 
             alpha = 0.1) +
   # Draw points for each poll (including those with only one poll)
@@ -295,7 +288,7 @@ ggplot() +
              size = 0.5, alpha = 0.3) +
   # Add the median line with ribbon for variability
   geom_line(data = pollster_summary, aes(x = end_date_num, y = median_support), 
-            color = "blue", size = 1) +
+            color = "royalblue", size = 1) +
   geom_ribbon(data = pollster_summary, aes(x = end_date_num, ymin = lower_quartile, ymax = upper_quartile), 
               fill = "lightblue", alpha = 0.2) +
   labs(
@@ -306,6 +299,7 @@ ggplot() +
   theme(legend.position = "none")
 
 ```
+
 In @fig-supportpollsters, we examine the impact of pollster variability on Harris's support percentage over time. This visualization introduces the variable pollster, highlighting the differences in polling results that arise from varying methodologies. The chart reveals considerable fluctuations and occasional outliers in Harris' support, likely due to the distinct approaches each pollster employs in sampling and weighting responses. 
 
 Overall, these visualizations illustrate that Harris’s voter support is not only state-dependent but also fluctuates significantly over time. In particular, many states exhibit notable shifts around mid-September, pointing to potential influences from external events or campaign dynamics during this period. Furthermore, the observed variability across pollsters emphasizes the necessity of a robust model that can account for differences in pollster methodologies. By incorporating temporal patterns, state-specific characteristics, and pollster variability, our predictive model will aim to provide a more comprehensive and nuanced forecast of support for Harris in key regions, helping to isolate genuine shifts in public opinion from noise introduced by polling differences.
@@ -315,27 +309,26 @@ Overall, these visualizations illustrate that Harris’s voter support is not on
 
 In this analysis, our primary outcome variable is the support percentage for Kamala Harris. This variable represents the proportion of respondents in each poll who indicated support for Harris. Given the competitive nature of the election, understanding how this support varies across states and over time is crucial for identifying trends and forecasting her overall performance.
 
-
-To introduce the outcome and predictor variables effectively, you’ll want to set the stage for your model by clearly defining what you are trying to predict (the outcome variable) and the factors that you believe influence it (the predictor variables). This section should provide context on why each variable is included and how it might impact the results, without yet delving into the specific mechanics of the model itself.
-
-Here’s an example of how to structure this paragraph:
-
 In this analysis, our primary outcome variable is the support percentage for Kamala Harris. This variable represents the proportion of respondents in each poll who indicated support for Harris. Given the competitive nature of the election, understanding how this support varies across states and over time is crucial for identifying trends and forecasting her overall performance.
 
 To explain the outcome, we consider several predictor variables:
 
-1. State: Since support for candidates can vary significantly across different states due to regional demographics, political history, and local issues, the state variable allows us to capture these geographical differences. As shown in the earlier visualizations, some states demonstrate consistently higher or lower support for Harris, emphasizing the importance of including state-level distinctions in our analysis.
+1. **State**: Since support for candidates can vary significantly across different states due to regional demographics, political history, and local issues, the state variable allows us to capture these geographical differences. As shown in the earlier visualizations, some states demonstrate consistently higher or lower support for Harris, emphasizing the importance of including state-level distinctions in our analysis.
 
-2. Days Since Declaration: Representing the number of days since Harris declared her candidacy, this temporal variable helps us capture shifts in voter sentiment over time. Our analysis reveals several critical points where support trends noticeably change, such as the upward or downward shifts in mid-September. This predictor allows the model to account for these temporal patterns and track how Harris’s support evolves as the campaign progresses.
+2. **Days Since Declaration**: Representing the number of days since Harris declared her candidacy, this temporal variable helps us capture shifts in voter sentiment over time. Our analysis reveals several critical points where support trends noticeably change, such as the upward or downward shifts in mid-September. This predictor allows the model to account for these temporal patterns and track how Harris’s support evolves as the campaign progresses.
 
-3. Pollster: Given that different pollsters employ varied methodologies, sampling techniques, and weighting schemes, the pollster variable captures the potential variability introduced by each polling organization. As illustrated in @fig-supportpollsters, the results can vary considerably depending on the pollster, with some reporting notably higher or lower support percentages for Harris. By including pollster as a predictor, we aim to control for this source of variability, helping the model focus on underlying trends rather than discrepancies introduced by polling differences.
+3. **Pollster**: Given that different pollsters employ varied methodologies, sampling techniques, and weighting schemes, the pollster variable captures the potential variability introduced by each polling organization. As illustrated in @fig-supportpollsters, the results can vary considerably depending on the pollster, with some reporting notably higher or lower support percentages for Harris. By including pollster as a predictor, we aim to control for this source of variability, helping the model focus on underlying trends rather than discrepancies introduced by polling differences.
 
 Each of these predictors provides a distinct layer of insight into Harris’s support trends. Together, they form the foundation of our predictive model, which will use these variables to more accurately forecast shifts in voter support and clarify the impact of state, time, and pollster methodology on public opinion.
 
 
 # Model
 
-We define our model as:
+## Model Step- Up
+
+We used the `stan_glmer` function from the `rstanarm` package to create a Bayesian regression model with a binomial family and logit link. This model is designed to predict the proportion of respondents who support Kamala Harris based on several key factors.
+
+The model specification is as follows:
 
 ```{=tex}
 \begin{align} 
@@ -344,112 +337,113 @@ y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
 \beta_0 &\sim \mbox{Normal}(0, 2.5) \\
 \beta_1 &\sim \mbox{Normal}(0, 2.5) \\
 \beta_2 &\sim \mbox{Normal}(0, 2.5) \\
-\beta_3 &\sim \mbox{Exponential}(1)
+\beta_3 &\sim \mbox{Normal}(0, 2.5) \\
+\sigma &\sim \mbox{Exponential}(1)
 \end{align}
 ```
 
+The outcome variable in this model is the proportion of respondents who support Harris in each poll, represented as $y_i$. This binomial outcome (successes out of the total sample size) is modeled as a function of several predictor variables that account for differences by state, pollster, and time.
 
-We used the `stan_glmer` function from `rstanarm` package to create a Bayesian regression model with a Normal distribution. The dependent variable in the proportion of respondent who support Kamala Harris, and our model aims to predict Harris' support based on several important factors, modeled by: 
+- $y_i$ is the dependent variable, representing the proportion of respondents who support Harris.
+- $\beta_0$: The intercept term, representing the expected proportion of $y_i$ when all other predictors are set to zero.
+- **State** ($\beta_1$): Categorical variable that accounts for differences in support across seven key swing states.
+- **Pollster** ($\beta_2$): Categorical variable capturing variability introduced by the polling organization.
+- **Days since first poll** ($\beta_3$): Numeric variable representing the number of days since Harris declared her candidacy.
 
-```{r}
-#| include: false
-#| warning: false
-#| message: false
+Each coefficient $beta$ follows the normal distribution with a mean of 0 and a standard deviation of 2.5, providing some regularization while allowing for a range of possible effects. The standard deviation $\sigma$ is given an Exponential(1) prior, which constrains it to positive values and provides a realistic expectation of variability around the mean 
+Each predictor captures a unique dimension of voter sentiment:
 
-# Define Model
-model <- cbind(num_harris, sample_size - num_harris) ~ (1 | state) + (1 | pollster) + (1 | end_date_num)
+- **State** accounts for regional differences in support due to factors like demographics and political history.
+- **Pollster** adjusts for methodological variations in polling, which we observed to influence support percentages.
+- **Days Since Declaration** captures temporal trends, allowing the model to incorporate fluctuations in voter sentiment over the campaign period.
 
-priors <- normal(0, 2.5, autoscale = TRUE)
+By combining these predictors, the model aims to forecast Harris’s support by isolating genuine trends from random variability.
 
-bayesian_model <- stan_glmer(
-  formula = model,
-  data = harrisdata,
-  family = binomial(link = "logit"),
-  prior = priors,
-  prior_intercept = priors,
-  # weights = harrisdata$numeric_grade,
-  seed = 123,
-  cores = 4,
-  adapt_delta = 0.95)
-```
+### Model justification
 
-where:
+Based on the data overview in @sec-graphs, we observe that Harris’s support varies across key swing states, and we expect these regional differences to influence our model's predictions. The state variable is anticipated to capture these geographic variations, with states like Arizona, Michigan, Georgia, and Pennsylvania showing relatively consistent high levels of support for Harris. In contrast, Nevada, North Carolina, and Wisconsin exhibit a declining trend in support. We expect the intercept to be around 50%, as this reflects the average level of support observed across all states and pollsters. 
 
-- $y_i$ is the dependent variable, represneting the proportion of respondents who support Harris
-- $\beta_0$ is the intercept term, representing the expected proportion of $y_i$ when all other predictors are set to zero.
-- $\beta_1$ corresponds to the `state` choosing one of seven states,
-- $\beta_2$ corresponds to the `pollster`,
-- $\beta_3$ is the value representing number of days since the first poll. 
+A model validation is included in `scripts/05-exploratory_data_analysis.R`, and a Posterior Predictive Check and summary statistics for the model are included in @sec-checks.
 
-All variables follow the normal distribution with a mean of 0 and a standard deviation of 2.5. 
+## Model Results 
+
+The model predicts an average support percentage of approximately 47.33% for Kamala Harris across the selected states. This percentage reflects the central tendency of predicted support within the dataset, factoring in the influence of state, pollster, and the number of days since the first poll.
+
+The results indicate variations in predicted support across states. For instance, Pennsylvania and Wisconsin show the highest average predicted support percentages (48.02% and 48.38%, respectively), while states like Nevada and Arizona display slightly lower support. 
+
+In states like Arizona, Georgia, Michigan, and North Carolina, the model predicts a steady increase in support for Harris over time, as shown in @fig-modelGAWM.
+In states such as Nevada, Pennsylvania, and Wisconsin, the model predicts a decline in support over time, as seen in @fig-modelNPW.
 
 ```{r}
 #| echo: false
 #| warning: false
 #| message: false
+#| label: fig-modelGAWM
+#| fig-cap: "Poll predictions of Arizona, Geogria, Michigan, North Carolina"
 
-# Plot checks for Model
-pp_check(bayesian_model)
-plot(bayesian_model, pars = "(Intercept)", prob = 0.95)
-modelsummary::modelsummary(
-  list(
-    "First model" = bayesian_model
-  ),
-  statistic = "mad",
-  fmt = 2
-)
-```
+bay_model <-
+  readRDS(file = here::here("models/bay_model.rds"))
 
-```{r}
-#| echo: false
-#| warning: false
-#| message: false
+harrisdata_clean <- harrisdata %>% drop_na()
 
 harrisdata <- harrisdata %>% drop_na()
-expected_probs <- posterior_epred(bayesian_model, newdata = harrisdata)
+expected_probs <- posterior_epred(bay_model, newdata = harrisdata)
 median_probs <- apply(expected_probs, 2, median)
 harrisdata <- harrisdata %>%
   mutate(median_prob = median_probs)
 
+subset_up <- harrisdata %>% filter(state %in% c("Arizona", "Georgia", "Michigan", "North Carolina"))
 
-ggplot(harrisdata, aes(x = end_date_num, y = median_prob, color = state)) +
-  geom_line(alpha = 0.5) +  # Plot raw data with some transparency to show noise
-  geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs", k = 10), se = FALSE) +  # Smoother with flexible spline
+ggplot(subset_up, aes(x = end_date_num, y = median_prob, color = state)) +
+  geom_line(alpha = 0.5) +  
+  geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs", k = 10), se = FALSE) +
   labs(
-    title = "Predicted Probability of Harris Outcome Over Time by State",
-    x = "Days Since First Poll (end_date_num)",
+    x = "Days Since First Poll",
     y = "Predicted Probability"
   ) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  facet_wrap(~ state, scales = "free_y")
+  facet_wrap(~ state) +
+  theme(legend.position = "none")
+
+```
+In @fig-modelNPW, we see states of Nevada, Pennsylvania and Wisconsin have a singular declining trend. 
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-modelNPW
+#| fig-cap: "Poll predictions of Nevada, Pennsylvania, Wisconsin"
 
 
-ggplot(harrisdata, aes(x = end_date_num, y = median_prob, color = state)) +
-  geom_line(alpha = 0.5) +  # Plot raw data with some transparency
-  geom_smooth(method = "loess", span = 0.3, se = FALSE) +  # Add a less smoothed trend line
+subset_down <- harrisdata %>% filter(state %in% c("Nevada", "Pennsylvania", "Wisconsin"))
+
+ggplot(subset_down, aes(x = end_date_num, y = median_prob, color = state)) +
+  geom_line(alpha = 0.5) +
+  geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs", k = 10), se = FALSE) + 
   labs(
-    title = "Predicted Probability of Harris Outcome Over Time by State",
-    x = "Days Since First Poll (end_date_num)",
+    x = "Days Since First Poll",
     y = "Predicted Probability"
   ) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  facet_wrap(~ state, scales = "free_y")
-
-```
-```{r}
-expected_probs <- posterior_epred(bayesian_model, newdata = harrisdata)
-
-# Calculate the mean predicted probability across all observations (overall predicted support percentage)
-overall_predicted_support <- mean(rowMeans(expected_probs)) * 100
-overall_predicted_support
-
+  facet_wrap(~ state, ncol = 2) +
+    theme(legend.position = "none")
 
 ```
 
+
+CONFIDENCE INTERVAL TABLE ??
+
+
+
 ```{r}
-expected_probs <- posterior_epred(bayesian_model, newdata = harrisdata)
+#| echo: false
+#| warning: false
+#| message: false
+
+expected_probs <- posterior_epred(bay_model, newdata = harrisdata)
 
 # Calculate the median predicted probability for each observation
 median_probs <- apply(expected_probs, 2, median)
@@ -466,37 +460,18 @@ predicted_support_table <- harrisdata %>%
 # Print the table
 predicted_support_table
 ```
+```{r}
 
+
+```
 
 The goal of our modelling strategy is twofold. Firstly,...
 
 Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
 
-## Model set-up
-
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
-
-### Model justification
-
-What do we expect...
-We expect a predictions in the high 40% based on our current data.
 
 
 # Results
-
-Our results are summarized in @tbl-modelresults.
-
-```{r}
-#| echo: false
-#| eval: true
-#| warning: false
-#| message: false
-
-library(rstanarm)
-
-first_model <-
-  readRDS(file = here::here("models/first_model.rds"))
-```
 
 
 
@@ -547,7 +522,6 @@ We believe Pennsylvania will vote: **Kamala Harris**
 
 
 
-
 ## Weaknesses and next steps
 
 Weaknesses and next steps should also be included.
@@ -556,74 +530,38 @@ Weaknesses and next steps should also be included.
 
 \appendix
 
-# Appendix {.unnumbered}
-
-# Additional data details
-
-# Model details {#sec-model-details}
-
-## Posterior predictive check
+# Appendix 1
 
 Why we choose NYT? - `numeric_grade` is 3 - `pollscore` is -1.5, a score of reliability called "Predictive Optimization of Latent skill Level in Surveys, Considering Overall Record, Empirically.", where negative numbers are better - `transparency_score` is 9, reflects pollsters transparency about their methodology (calculated based on how much information it discloses about its polls and weighted by recency) - `population_full` is 'rv', respondents are registered voters
 
-In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
-
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows...
-
-```{r}
-#| eval: false
-#| message: false
-#| warning: false
-#| label: fig-ppcheckandposteriorvsprior
-#| layout-ncol: 2
-#| fig-cap: "Examining how the model fits, and is affected by, the data"
-#| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
-
-pp_check(first_model) +
-  theme_classic() +
-  theme(legend.position = "bottom")
-
-posterior_vs_prior(first_model) +
-  theme_minimal() +
-  scale_color_brewer(palette = "Set1") +
-  theme(legend.position = "bottom") +
-  coord_flip()
-```
-
-## Diagnostics
-
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
-
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
-
-```{r}
-#| echo: false
-#| eval: false
-#| message: false
-#| warning: false
-#| label: fig-stanareyouokay
-#| fig-cap: "Checking the convergence of the MCMC algorithm"
-#| fig-subcap: ["Trace plot", "Rhat plot"]
-#| layout-ncol: 2
-
-plot(first_model, "trace")
-
-plot(first_model, "rhat")
-```
-
-\newpage
-
-# Appendix 1
-
-
 # Appendix 2
+
 Here we will be talking about how we would conduct a $100,000 surevey to gather data about this upcoming election to ensure there is minimal error in the data we are collecting and, our data represents the facts we want them to represent. 
-Out of the \$100,000 we will allocate \$15000 for the necessary development and administration of the data. This means we will be spending this money to create the survey, and have a infrastructure in place to hold the large amount of data as well as cover any security fees to keep this data private and safe. Then we allocate $50000 to advertise the survey. We will need a large sample so we will be spending most of our budget for this. We will have a different urls for each advertisement we have so that we can incorporate this in our data to see which demographic is accessing the survey through which platform. The platforms to advertise this is through spotify, facebook, instagram, and some news networks. If possible we will try to use this money to get it endorsed by branches of government to show our reliability. Reliability is also what citizens respond to so this will get a lot of respondants. We will spend \$25,000 for modeling our data as they tend to be expensive with data this size. And the rest of the \$15,000 will be leftover cost for anything that we don't foresee. If there is any leftover we can add a survey participation price such as having a free 3 month trial for the platforms we mentioned above (that is if they have a subscription based membership). 
+Out of the \$100,000 we will allocate \$15000 for the necessary development and administration of the data. This means we will be spending this money to create the survey, and have a infrastructure in place to hold the large amount of data as well as cover any security fees to keep this data private and safe. Then we allocate $50000 to advertise the survey. We will need a large sample so we will be spending most of our budget for this. We will have a different urls for each advertisement we have so that we can incorporate this in our data to see which demographic is accessing the survey through which platform. The platforms to advertise this is through spotify, facebook, instagram, and some news networks. If possible we will try to use this money to get it endorsed by branches of government to show our reliability. Reliability is also what citizens respond to so this will get a lot of respondents. We will spend \$25,000 for modeling our data as they tend to be expensive with data this size. And the rest of the \$15,000 will be leftover cost for anything that we don't foresee. If there is any leftover we can add a survey participation price such as having a free 3 month trial for the platforms we mentioned above (that is if they have a subscription based membership). 
 
 We will not be using telephone surveys because according to reserach [@idSurvey] we find the most people, don't pick up calls from unknown numbers and even the people that pick it up they are less inclined to answer the questions of the survey. 
 
 Next to look at the actual contents of the survey. They can be accessed through this link:[Sample survey question](https://forms.office.com/Pages/ResponsePage.aspx?id=JsKqeAMvTUuQN7RtVsVSEL7G89G56QlHp_qqIPzGbJdUME9UQzJaWUlCVldZTktRV09UQ0Q3N0hQRi4u). There are 3 things that we were careful of when we were creating this survey. First thing we considered was transperency. People need the reassurence that the data that is being collected will not be used against them, and so we teel them what data we do collect and how the data we collect cannot be used to identify a person. The second thing we focus on is readability of the questions. We tried to make them as simple as possible using accessibile language, and tried to keep it short as well (@Tourangeau_Rips_Rasinski_2000). We also prioritised the size of the survey. We kept it to a short 11 questions that will tell us their political standing in the past and present. We know what current issues are important to them as well as their age group and the state they are from. This will help us gather data without inconveniencing the person. 
 
 Finally we take a look at how we sample from the gathered data. We thought about random sampling but we were worried about having unequal proportions of the demographic we would advertise to. So if more people that go to facebook responded, that doesn't necessairly mean that people use facebook more than the other platforms. So we we decided to combine startified and cluster  sampling(@annurev). The idea is that we will choose based on the different platforms we advertise to first to have a cluster sampling method. And then we will sample the data by dividing the people by the certain aspects of the surevy, like if they are in different age groups or if they are registered voters. This is called Stratified Sampling (@annurev). Then we take a union of all the samples and we gather a group that we are able to build models based off of. 
+
+# Appendix 3 - checks and summary stats {#sec-checks}
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# Plot checks for Model
+pp_check(bay_model)
+plot(bay_model, pars = "(Intercept)", prob = 0.95)
+modelsummary::modelsummary(
+  list(
+    "First model" = bay_model
+  ),
+  statistic = "mad",
+  fmt = 2
+)
+```
 
 # References
