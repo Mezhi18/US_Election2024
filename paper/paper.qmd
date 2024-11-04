@@ -485,14 +485,7 @@ We believe Nevada will vote: **Kamala Harris**
 
 ## North Carolina {#sec-norcar}
 
-North Carolina has been an exclusively Republican state since 1980, with a singular exception in 2008 when the state was democratic and voted for Obama. This means that North Carolina voted for Trump in th last two elections, in 2016 there was more significant win for the republican with 49.8% of the vote, with 46.2% going to the Democrats. While in 2020, the Republicans maintained their support from the state but the margin of victory was slimmer with them receiving 49.9% of the vote and Biden getting 48.8%.
 
-Now, if we look at @fig-supportGNN Harris had a spike in early September like many other states where she was polling around 48%, but afterwards had a minor but gradual decline 
-since. Although when we take a look at our model results in @fig-modelGANM we see that our prediction is that Harris's support is predicted to increase in North Carolina.
-
-North Carolina is a significantly difficult state to predict when we consider its Republican history, predicted support for Harris, and @fig-supportstate, where both candidates are neck and neck the chance for this state to go to either candidate is very up in the air.
-
-We believe North Carolina will vote: **Donald Trump**
 
 ## Michigan {#sec-michigan}
 
@@ -511,6 +504,7 @@ Lastly, if we consider @fig-supportWP we see that harris has been polling at a c
 We believe Pennsylvania will vote: **Kamala Harris**
 
 ## Wisconsin {#sec-wisconsin}
+
 
 
 ## Weaknesses and next steps
