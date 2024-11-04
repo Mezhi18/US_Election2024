@@ -505,7 +505,7 @@ first_model <-
 
 ## Arizona {#sec-arizona}
 
-Arizona is a very important swing state especially as the state has switches which party they voted for in in the last two elections with Trump winning 49% of the vote and Clinton with 45.5%, which considering Arizona is a swing state is a rather significant6 margin. While in the 2020 election Biden ended up winning Arizona with 49.4% of the vote and Trump 49.1%, which is a much smaller margin of victory and what makes Arizona so questionable in the 2024 election. We can see in @fig-pollingharris that while the polling numbers for Harris started somewhat low around 42%, the have gone up significantly and have continued to trend upwards in the most recent polls. Although, in the @fig-supportstate trump still has larger support in the state, and the largest polling difference in Trump's favour out of all the swing states polled.
+Arizona is a very important swing state especially as the state has switches which party they voted for in in the last two elections with Trump winning 49% of the vote and Clinton with 45.5%, which considering Arizona is a swing state is a rather significant6 margin. While in the 2020 election Biden ended up winning Arizona with 49.4% of the vote and Trump 49.1%, which is a much smaller margin of victory and what makes Arizona so questionable in the 2024 election. We can see in @fig-supportAM that while the polling numbers for Harris started somewhat low around 42%, the have gone up significantly and have continued to trend upwards in the most recent polls. Although, in the @fig-supportstate trump still has larger support in the state, and the largest polling difference in Trump's favour out of all the swing states polled.
 
 We believe Arizona will vote: **Donald Trump**
 
@@ -513,27 +513,35 @@ We believe Arizona will vote: **Donald Trump**
 
 Considering the last two elections Georgia is very similar to Arizona, as in 2016 Trump won the state with 50.8% to Clinton's 45.6%. While in the 2020 election Biden won with a slim victory of 49.5% to Trump's 49.3%, which again is very similar to Arizona's last two election results with significant republican victory in 2016 and a rather marginal win in 2020, which was the first democratic victory for the state since 1992. Georgia is in an interesting situation as lot of the democratic vote in the state comes from the black community, although Harris a has less support from male black population, as the last victory for Biden was as a small margin, even a small percent of the population switching their vote could heavily impact the vote in 2024.
 
-In @fig-pollingharris at the beginning of the polling data the support for Harris was relatively low, while it did start to grow the polling percentage somewhat plateaued at around 47.5% and does not show any signs of growing. Furthermore, in @fig-supportstate we can see that Trump has the edge over Harris considering all of these factors there is a very real possibility that Trump does win Georgia at the end of the day.
+In @fig-supportGNN at the beginning of the polling data the support for Harris was relatively low, while it did start to grow the polling percentage somewhat plateaued at around 47.5% and does not show any signs of growing. Furthermore, in @fig-supportstate we can see that Trump has the edge over Harris considering all of these factors there is a very real possibility that Trump does win Georgia at the end of the day.
 
 We believe Georgia will vote: **Donald Trump**
 
-
-
-## Michigan {#sec-michigan}
-
-Harris is currently leading the polls in Michigan with 49% of the vote and Trump with 47%, this is a rather slim margin, but the first in the discussed states where Harris is leading in the polls. In @fig-pollingharris we can see that there was a significant jump for Harris and a small dip in October followed by a gradual increase leading up to the elections. When we look at the voting history of the state in the last two elections, the have voted for the same candidates as Arizona and Georgia, where they voted for Biden in 2020 and for Trump in 2016, with the voting percentages at 50.6% to 47.8% in 2020 and 47.5% to 47.3 in 2016 with respect to the winner. Although unlike the previously mentioned states 2016 was the first time the state voted for the republican candidate since 1992. Considering Michigan is home to the largest black majority city in the United states, Detroit, and a large majority of union workers who often vote democratic as it is seen as the more union-friendly party between the two it is rather like that Harris will win the state.
-
-We believe Michigan will vote for: **Kamala Harris**
-
-
-
 ## Nevada {#sec-nevada}
+
+Nevada is a state who's majority is dessert and wilderness, with two large cities being Reno and Las Vegas, as the case is with many states a Majority of democratic votes come from large cities and the majority of republican votes coming from rural areas. Nevada has been a democratic state for the last 4 elections with at least a 2% difference in favor of the democrats in the last two elections.
+
+Interestingly enough, if we look at @fig-supportGNN we can see Nevada, similar to several other states had a spike in support of Harris in early September peaking north of 48% in the polls and their recent history of voting in favor of the democratic candidates. Nevertheless, Harris is seen to have had a gradual decline in the state stabilizing at around 46%, which which seems low in comparison to other states that are looking more favorably at Harris than Trump. Still, when we look at @supportstate Harris is still has a marginal to Trump, considering all of these factors it is likely Harris will in fact take Nevada for the democrats.
+
+We believe Nevada will vote: **Kamala Harris**
 
 ## North Carolina {#sec-norcar}
 
 ## Michigan {#sec-michigan}
 
+Harris is currently leading the polls in Michigan with 49% of the vote and Trump with 47%, this is a rather slim margin, but the first in the discussed states where Harris is leading in the polls. In @fig-supportAM we can see that there was a significant jump for Harris and a small dip in October followed by a gradual increase leading up to the elections. When we look at the voting history of the state in the last two elections, the have voted for the same candidates as Arizona and Georgia, where they voted for Biden in 2020 and for Trump in 2016, with the voting percentages at 50.6% to 47.8% in 2020 and 47.5% to 47.3 in 2016 with respect to the winner. Although unlike the previously mentioned states 2016 was the first time the state voted for the republican candidate since 1992. Considering Michigan is home to the largest black majority city in the United states, Detroit, and a large majority of union workers who often vote democratic as it is seen as the more union-friendly party between the two it is rather like that Harris will win the state.
+
+We believe Michigan will vote for: **Kamala Harris**
+
 ## Pennsylvania {#sec-penn}
+
+Pennsylvania is an interesting for several reasons, the first is that before Tim Walz was announced as Kamala Harris's running mate, one of the speculated candidates was Josh Shapiro, the current governor of Pennsylvania, which presidential candidates often consider from where their potential running mates are from as they tend to help with swing states nevertheless, she did not choose Shapiro as her running mate and this is no longer a factor. 
+
+Second, Similarly to Nevada and Michigan Pennsylvania Voted for Trump in 2016 with a 48.2% to a 47.5% victory, and for Biden in 2020 with a slightly more significant but not overwhelming victory at 50% to 48.8%. 2016 was the first time Pennsylvania voted for a republican candidate since 1988. 
+
+Lastly, if we consider @fig-supportWP we see that harris has been polling at a consistent 48% since mid september which is somewhat similar to Georgia, while Pennsylvania seems to be leaning more democratic than republican than Georgia.@fig-supportGNN, they have both similarly increased their interest in Harris since the polling began until mid september which is when they both becan to plateau at their current polling numbers.
+
+We believe Pennsylvania will vote: **Kamala Harris**
 
 ## Wisconsin {#sec-wisconsin}
 
