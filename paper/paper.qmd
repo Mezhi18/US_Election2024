@@ -30,7 +30,7 @@ library(lubridate)
 library(broom)
 library(modelsummary)
 library(rstanarm)
-library(splines)
+library(knitr)
 ```
 
 
@@ -72,17 +72,20 @@ Each pollster has a numeric grade from 1.0 to 3.0, which indicates the quality/ 
 
 ¿ does this go into data cleaning ?
 
-We use the statistical programming language R [@citeR]. Our data comes from [@fivethirtyeight2024] and was cleaned, modeled and graphed, using @broom, @tidy, @rstanarm, @janitor, @lubr, @broom, @modelsummary, @splines. 
+We use the statistical programming language R [@citeR]. Our data comes from [@fivethirtyeight2024] and was cleaned, modeled and graphed, using @broom, @tidy, @rstanarm, @janitor, @lubr, @modelsummary.
 
 
-## Methodology
+## Methodology and Measurement 
 
-This paper uses 'polls-of-polls' method to analyze and predict our outcome, which combines polls from multiple sources (pollsters). By combining results from various sources, this approach incorporates diverse perspectives, which helps to minimize individual biases and provides a more balanced view. Unlike relying on a single poll, which can be influenced by its own biases, the 'polls-of-polls' method enhances reliability and increases the overall validity of the results.
+This paper employs a "polls-of-polls" approach to analyze and predict our outcome, combining data from multiple pollsters. By integrating results from various sources, this method captures a broader range of perspectives, reducing the influence of individual biases and offering a more balanced view. Unlike relying on a single poll, which may be shaped by its unique methodological biases, the "polls-of-polls" approach enhances reliability and increases the overall validity of our predictions.
 
+Each pollster uses methodologies they believe are most effective for capturing an accurate snapshot of public opinion. Pollsters begin by selecting a sample of voters they consider representative of the broader population, factoring in various demographics such as age, region, and socio-economic background. However, polling methods differ significantly; some pollsters rely on phone interviews, while others use online surveys, text messaging, or a combination of methods (mixed-mode). After data collection, pollsters apply weighting adjustments to account for demographic imbalances, ensuring that underrepresented groups are adequately reflected in the results.
 
-... explain how pollsters survey people, what their different methodologies are, and why these things are important for an accurate prediction...
+The diversity in methodologies helps reduce systematic bias compared to using a single poll source. Different methods may also be more effective in reaching certain demographics—such as older voters through phone surveys and younger voters through online platforms—broadening the inclusivity and representativeness of the sample.
 
-## Measurement/ Data Visualization {#sec-graphs}
+n predictive modeling, accounting for pollster variability and methodology is essential to avoid overfitting to any single source. By including pollster as a predictor in the model, we allow it to recognize that poll results may vary not only due to real changes in public opinion but also because of differences in survey methodologies. This consideration enables the model to generate more accurate, generalized predictions, offering a reliable forecast that reflects a well-rounded view of public opinion
+
+## Data Visualization {#sec-graphs}
 
 ```{r}
 #| include: false
@@ -350,7 +353,7 @@ The outcome variable in this model is the proportion of respondents who support 
 - **Pollster** ($\beta_2$): Categorical variable capturing variability introduced by the polling organization.
 - **Days since first poll** ($\beta_3$): Numeric variable representing the number of days since Harris declared her candidacy.
 
-Each coefficient $beta$ follows the normal distribution with a mean of 0 and a standard deviation of 2.5, providing some regularization while allowing for a range of possible effects. The standard deviation $\sigma$ is given an Exponential(1) prior, which constrains it to positive values and provides a realistic expectation of variability around the mean 
+Each coefficient $\beta$ follows the normal distribution with a mean of 0 and a standard deviation of 2.5, providing some regularization while allowing for a range of possible effects. The standard deviation $\sigma$ is given an Exponential(1) prior, which constrains it to positive values and provides a realistic expectation of variability around the mean 
 Each predictor captures a unique dimension of voter sentiment:
 
 - **State** accounts for regional differences in support due to factors like demographics and political history.
@@ -437,7 +440,6 @@ ggplot(subset_down, aes(x = end_date_num, y = median_prob, color = state)) +
 CONFIDENCE INTERVAL TABLE ??
 
 
-
 ```{r}
 #| echo: false
 #| warning: false
@@ -455,10 +457,12 @@ harrisdata <- harrisdata %>%
 # Calculate the average predicted support by state
 predicted_support_table <- harrisdata %>%
   group_by(state) %>%
-  summarize(average_predicted_support = round(mean(median_prob) * 100,2))
+  summarize(average_predicted_support = round(mean(median_prob) * 100,2)) %>%
+    arrange(average_predicted_support) 
 
-# Print the table
-predicted_support_table
+#predicted_support_table <- predicted_support_table[, c("state", "average_predicted_support")]
+
+kable(predicted_support_table, col.names = c("State", "Avg. Predicted Support for Harris"), digits = 2)
 ```
 ```{r}
 
