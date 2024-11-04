@@ -17,4 +17,4 @@ The repo is structured as:
 
 ## Statement on LLM usage
 
-Aspects of the code were written with the help of ChatGPT. It was used to help with anything from finding inspiration for budget allocation, to graphing, to making correct citations. Sakura: https://chatgpt.com/share/67281e8a-c874-8012-a645-ad96b0616a6a, Cristina: https://chatgpt.com/share/67291d47-f470-8004-bb15-2536144a6ae6.
+Aspects of the code were written with the help of ChatGPT. It was used to help with anything from finding inspiration for budget allocation, to graphing, to making correct citations. Sakura: https://chatgpt.com/share/67281e8a-c874-8012-a645-ad96b0616a6a, Cristina: https://chatgpt.com/share/67291d47-f470-8004-bb15-2536144a6ae6, Yan:https://chatgpt.com/g/g-TgjKDuQwZ-r-wizard/c/67291058-91c8-8001-b702-4e7dcc146365.
