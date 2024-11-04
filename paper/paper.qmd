@@ -170,21 +170,21 @@ Use sub-sub-headings for each outcome variable and feel free to combine a few in
 
 # Model
 
-This is Model 1, follows Bayesian Model
-
 We define our model as:
 
-*define each vairable here*
 ```{=tex}
 \begin{align} 
 y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \beta_0 + \beta_1 \times \mbox{State}_i + \beta_2 \times \mbox{Days Since First Poll}_i + \beta_3 \times \mbox{Pollster}_i \\
+\mu_i &= \beta_0 + \beta_1 \times \mbox{State}_i + \beta_2 \times \mbox{Pollster}_i + \beta_3 \times \mbox{Days since first poll}_i\\
 \beta_0 &\sim \mbox{Normal}(0, 2.5) \\
 \beta_1 &\sim \mbox{Normal}(0, 2.5) \\
 \beta_2 &\sim \mbox{Normal}(0, 2.5) \\
 \beta_3 &\sim \mbox{Exponential}(1)
 \end{align}
 ```
+
+
+We used the `stan_glmer` function from `rstanarm` package to create a Bayesian regression model with a Normal distribution. The dependent variable in the proportion of respondent who support Kamala Harris, and our model aims to predict Harris' support based on several importnat factors, modeled by: 
 
 ```{r}
 #| include: false
@@ -194,10 +194,8 @@ y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
 # Turn end_date into quantifiable column, to use for model
 harrisdata <- harrisdata %>%
   mutate(
-    end_date_num = as.numeric(end_date - min(end_date)))
-
-harrisdata <- harrisdata |>
-  mutate(state = factor(state))
+    end_date_num = as.numeric(end_date - min(end_date)),
+        state = factor(state))
 
 # Define Model
 model <- cbind(num_harris, sample_size - num_harris) ~ (1 | state) + (1 | pollster) + (1 | end_date_num)
@@ -210,11 +208,21 @@ bayesian_model <- stan_glmer(
   family = binomial(link = "logit"),
   prior = priors,
   prior_intercept = priors,
-  weights = harrisdata$numeric_grade,
+  # weights = harrisdata$numeric_grade,
   seed = 123,
   cores = 4,
   adapt_delta = 0.95)
 ```
+
+where:
+
+- $y_i$ is the dependent variable, represneting the proportion of respondents who support Harris
+- $\beta_0$ is the intercept term, representing the expected proportion of $y_i$ when all other predictors are set to zero.
+- $\beta_1$ corresponds to the `state` choosing one of seven states,
+- $\beta_2$ corresponds to the `pollster`,
+- $\beta_3$ is the value representing number of days since the first poll. 
+
+All variables follow the normal distribution with a mean of 0 and a standard deviation of 2.5. 
 
 ```{r}
 #| echo: false
@@ -233,149 +241,46 @@ modelsummary::modelsummary(
 )
 ```
 
-
-This is Model 2 
-
-```{r}
-#| include: false
-#| warning: false
-#| message: false
-
-spline_model <- stan_glm(
-  pct ~ ns(end_date_num, df = 5) + pollster + state, 
-  data = harrisdata,
-  family = gaussian(),
-  prior = normal(0, 5),
-  prior_intercept = normal(50, 10),
-  seed = 1234,
-  iter = 2000,
-  chains = 4,
-  refresh = 0
-)
-
-# Summarize the model
-summary(spline_model)
-
-# Posterior predictive checks
-pp_check(spline_model)
-
-modelsummary::modelsummary(
-  list(
-    "First model" = spline_model
-  ),
-  statistic = "mad",
-  fmt = 2
-)
-```
-
 ```{r}
 #| echo: false
 #| warning: false
 #| message: false
 
+harrisdata <- harrisdata %>% drop_na()
+expected_probs <- posterior_epred(bayesian_model, newdata = harrisdata)
+median_probs <- apply(expected_probs, 2, median)
+harrisdata <- harrisdata %>%
+  mutate(median_prob = median_probs)
 
-harrisdata$pollster <- factor(harrisdata$pollster)
-harrisdata$state <- factor(harrisdata$state)
 
-new_data <- data.frame(
-  end_date_num = seq(
-    min(harrisdata$end_date_num),
-    max(harrisdata$end_date_num),
-    length.out = 100
-  ),
-  pollster = factor("YouGov", levels = levels(harrisdata$pollster)),
-  state = factor("Georgia", levels = levels(harrisdata$state)))
-
-posterior_preds <- posterior_predict(spline_model, newdata = new_data)
-
-pred_summary <- new_data |>
-  mutate(
-    pred_mean = colMeans(posterior_preds),
-    pred_lower = apply(posterior_preds, 2, quantile, probs = 0.025),
-    pred_upper = apply(posterior_preds, 2, quantile, probs = 0.975)
-  )
-
-# Plot data and Bayesian model predictions with confidence ribbon
-ggplot(harrisdata, aes(x = end_date_num, y = pct, color = state)) +
-  geom_point() +
-  geom_line(
-    data = pred_summary,
-    aes(x = end_date_num, y = pred_mean),
-    color = "blue",
-    inherit.aes = FALSE
-  ) +
-  geom_ribbon(
-    data = pred_summary,
-    aes(x = end_date_num, ymin = pred_lower, ymax = pred_upper),
-    alpha = 0.2,
-    inherit.aes = FALSE
-  ) +
+ggplot(harrisdata, aes(x = end_date_num, y = median_prob, color = state)) +
+  geom_line(alpha = 0.5) +  # Plot raw data with some transparency to show noise
+  geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs", k = 10), se = FALSE) +  # Smoother with flexible spline
   labs(
-    x = "Days since earliest poll",
-    y = "Percentage",
-    title = "Poll Percentage over Time"
+    title = "Predicted Probability of Harris Outcome Over Time by State",
+    x = "Days Since First Poll (end_date_num)",
+    y = "Predicted Probability"
   ) +
-  facet_wrap(~ state, scales = "free_y") +
-  theme_minimal()
-```
-
-# TRUMP #
-
-```{r}
-trumpdata <- preddata %>%
-  filter(state %in% c("Georgia", "Arizona", "Nevada", "Michigan", "North Carolina", "Pennsylvania", "Wisconsin")) %>%
-  filter(candidate_name == "Donald Trump") %>%
-  mutate(end_date = mdy(end_date)) %>%
-  filter(end_date >= as.Date("2024-07-21")) %>%
-  mutate(num_trump = round((pct / 100) * sample_size, 0))
-
-ggplot(trumpdata, aes(x = reorder(state, pct, median), y = pct, fill = state)) +
-  geom_boxplot() +
-  coord_flip() +  # Flip for better readability
-  labs(x = "State", y = "Support Percentage") +
   theme_minimal() +
-  theme(legend.position = "none")
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  facet_wrap(~ state, scales = "free_y")
 
-trumpdata <- trumpdata %>%
-  mutate(
-    end_date_num = as.numeric(end_date - min(end_date)))
 
-trumpdata <- trumpdata |>
-  mutate(state = factor(state))
+ggplot(harrisdata, aes(x = end_date_num, y = median_prob, color = state)) +
+  geom_line(alpha = 0.5) +  # Plot raw data with some transparency
+  geom_smooth(method = "loess", span = 0.3, se = FALSE) +  # Add a less smoothed trend line
+  labs(
+    title = "Predicted Probability of Harris Outcome Over Time by State",
+    x = "Days Since First Poll (end_date_num)",
+    y = "Predicted Probability"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  facet_wrap(~ state, scales = "free_y")
 
-# Define Model
-model2 <- cbind(num_trump, sample_size - num_trump) ~ (1 | state) + (1 | pollster) + (1 | end_date_num)
-
-priors <- normal(0, 2.5, autoscale = TRUE)
-
-bayesian_model2 <- stan_glmer(
-  formula = model2,
-  data = trumpdata,
-  family = binomial(link = "logit"),
-  prior = priors,
-  prior_intercept = priors,
-  weights = trumpdata$numeric_grade,
-  seed = 123,
-  cores = 4,
-  adapt_delta = 0.95)
 ```
 
-```{r}
-#| echo: false
-#| warning: false
-#| message: false
 
-# Plot checks for Model
-pp_check(bayesian_model2)
-plot(bayesian_model2, pars = "(Intercept)", prob = 0.95)
-modelsummary::modelsummary(
-  list(
-    "First model" = bayesian_model2
-  ),
-  statistic = "mad",
-  fmt = 2
-)
-```
 
 The goal of our modelling strategy is twofold. Firstly,...
 
@@ -407,84 +312,9 @@ first_model <-
   readRDS(file = here::here("models/first_model.rds"))
 ```
 
-```{r}
-#| echo: false
-#| eval: true
-#| label: tbl-modelresults
-#| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
-#| warning: false
 
-modelsummary::modelsummary(
-  list(
-    "First model" = first_model
-  ),
-  statistic = "mad",
-  fmt = 2
-)
-```
 
-```{r}
-harrisdata <- harrisdata %>% filter(!is.na(numeric_grade)) %>% filter(!is.na(num_harris))
-trumpdata <- trumpdata %>% filter(!is.na(numeric_grade)) %>% filter(!is.na(num_trump))
-trumpdata
-```
 
-```{r}
-library(dplyr)
-library(ggplot2)
-library(rstanarm)
-
-harris_data <- harrisdata %>%
-  mutate(
-    candidate_name = "Kamala Harris",
-    support_ratio = num_harris  # Assuming harris_support_ratio is already calculated
-  ) %>%
-  select(end_date_num, candidate_name, support_ratio)
-
-# Prepare Trump data with a unified structure
-trump_data <- trumpdata %>%
-  mutate(
-    candidate_name = "Donald Trump",
-    support_ratio = num_trump  # Assuming trump_support_ratio is already calculated
-  ) %>%
-  select(end_date_num, candidate_name, support_ratio)
-
-# Combine both into a single data frame
-combined_data <- bind_rows(harris_data, trump_data)
-
-library(ggplot2)
-library(ggplot2)
-
-# Assuming `combined_data` contains columns `end_date_num`, `support_ratio`, and `candidate_name`
-
-ggplot(combined_data, aes(x = end_date_num, y = support_ratio, color = candidate_name, fill = candidate_name)) +
-  # Shaded area around each line for overlap visualization
-  geom_ribbon(data = combined_data %>% filter(candidate_name == "Kamala Harris"),
-              aes(ymin = support_ratio - 0.05, ymax = support_ratio + 0.05),
-              alpha = 0.3, fill = "red") +
-  geom_ribbon(data = combined_data %>% filter(candidate_name == "Donald Trump"),
-              aes(ymin = support_ratio - 0.05, ymax = support_ratio + 0.05),
-              alpha = 0.3, fill = "blue") +
-  
-  # Line plot for each candidate
-  geom_line(aes(group = candidate_name), size = 1) +
-  
-  scale_color_manual(values = c("Kamala Harris" = "red", "Donald Trump" = "blue")) +  # Set line colors
-  labs(
-    x = "Days Since Earliest Poll", 
-    y = "Support Ratio",
-    color = "Candidate",
-    title = "Support Ratio for Harris and Trump Over Time with Overlap Highlighted"
-  ) +
-  theme_minimal() +
-  theme(
-    text = element_text(size = 12),
-    plot.title = element_text(hjust = 0.5),
-    legend.position = "top",
-    legend.title = element_text(face = "bold")
-  )
-
-```
 # Discussion
 
 ## Arizona {#sec-arizona}
@@ -580,16 +410,9 @@ plot(first_model, "rhat")
 
 # Appendix 2
 
-Here we will be talking about how we would conduct a $100,000 surevey to gather data about this upcoming election to ensure there is minimal error in the data we are collecting and, our data represents the facts we want them to represent. 
-Out of the \$100,000 we will allocate \$15000 for the necessary development and administration of the data. This means we will be spending this money to create the survey, and have a infrastructure in place to hold the large amount of data as well as cover any security fees to keep this data private and safe. Then we allocate $50000 to advertise the survey. We will need a large sample so we will be spending most of our budget for this. We will have a different urls for each advertisement we have so that we can incorporate this in our data to see which demographic is accessing the survey through which platform. The platforms to advertise this is through spotify, facebook, instagram, and some news networks. If possible we will try to use this money to get it endorsed by branches of government to show our reliability. Reliability is also what citizens respond to so this will get a lot of respondants. We will spend \$25,000 for modeling our data as they tend to be expensive with data this size. And the rest of the \$15,000 will be leftover cost for anything that we don't foresee. If there is any leftover we can add a survey participation price such as having a free 3 month trial for the platforms we mentioned above (that is if they have a subscription based membership). 
 
-We will not be using telephone surveys because according to reserach [@idSurvey] we find the most people, don't pick up calls from unknown numbers and even the people that pick it up they are less inclined to answer the questions of the survey. 
-
-Next to look at the actual contents of the survey. They can be accessed through this link:[Sample survey question](https://forms.office.com/Pages/ResponsePage.aspx?id=JsKqeAMvTUuQN7RtVsVSEL7G89G56QlHp_qqIPzGbJdUME9UQzJaWUlCVldZTktRV09UQ0Q3N0hQRi4u). There are 3 things that we were careful of when we were creating this survey. First thing we considered was transperency. People need the reassurence that the data that is being collected will not be used against them, and so we teel them what data we do collect and how the data we collect cannot be used to identify a person. The second thing we focus on is readability of the questions. We tried to make them as simple as possible using accessibile language, and tried to keep it short as well (@Tourangeau_Rips_Rasinski_2000). We also prioritised the size of the survey. We kept it to a short 11 questions that will tell us their political standing in the past and present. We know what current issues are important to them as well as their age group and the state they are from. This will help us gather data without inconveniencing the person. 
-
-Finally we take a look at how we sample from the gathered data. We thought about random sampling but we were worried about having unequal proportions of the demographic we would advertise to. So if more people that go to facebook responded, that doesn't necessairly mean that people use facebook more than the other platforms. So we we decided to combine startified and cluster  sampling(@annurev). The idea is that we will choose based on the different platforms we advertise to first to have a cluster sampling method. And then we will sample the data by dividing the people by the certain aspects of the surevy, like if they are in different age groups or if they are registered voters. This is called Stratified Sampling (@annurev). Then we take a union of all the samples and we gather a group that we are able to build models based off of. 
-
-
+=======
+>>>>>>> eda40e1517683f0ad12e0bcd901797a2bb2abd7d
 \newpage
 
 # References
