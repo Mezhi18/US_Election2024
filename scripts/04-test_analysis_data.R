@@ -1,69 +1,47 @@
 #### Preamble ####
-# Purpose: Tests... [...UPDATE THIS...]
-# Author: Rohan Alexander [...UPDATE THIS...]
-# Date: 26 September 2024 [...UPDATE THIS...]
-# Contact: rohan.alexander@utoronto.ca [...UPDATE THIS...]
-# License: MIT
-# Pre-requisites: [...UPDATE THIS...]
-# Any other information needed? [...UPDATE THIS...]
+# Purpose: Tests the data set for any out of place values
+# Author: Sakura Noskor, Yan Mezhiborsky, Cristina Burca
+# Date: 3 November 2024
+# Contact: cristina.burca@mail.utoronto.ca, sakura.noskor@mail.utoronto.ca,  yan.mezhiborsky@mail.utoronto.ca
 
 
 #### Workspace setup ####
 library(tidyverse)
+
+# Load necessary libraries
+# Load necessary libraries
 library(testthat)
+library(validate)
+library(readr)
 
-data <- read_csv("data/02-analysis_data/analysis_data.csv")
+# Load the simulated data
+poll_data <- read.csv("./data/01-raw_data/raw_data.csv")
 
+# Define validation rules
+rules <- validator(
+  n_polls = nrow(poll_data) == 100,
+  n_cols = ncol(poll_data) == 9,
+  is_character_pollster = all(sapply(poll_data$pollster, is.character)),
+  is_numeric_sample_size = all(sapply(poll_data$sample_size, is.numeric)),
+  is_character_state = all(sapply(poll_data$state, is.character)),
+  is_character_candidate = all(sapply(poll_data$candidate_name, is.character)),
+  is_numeric_pct = all(sapply(poll_data$pct, is.numeric)),
+  is_date_start = all(sapply(poll_data$start_date, is.Date)),
+  is_date_end = all(sapply(poll_data$end_date, is.Date)),
+  is_numeric_pollscore = all(sapply(poll_data$pollscore, is.numeric)),
+  is_numeric_grade = all(sapply(poll_data$numeric_grade, is.numeric)),
+  pollster_in_set = all(poll_data$pollster %in% c("YouGov", "New York Times", "Ipsos", "The Washington Post", "1892 Polling")),
+  sample_size_in_set = all(poll_data$sample_size %in% c(800, 1000, 1200, 1500, 2000)),
+  state_in_set = all(poll_data$state %in% c("Arizona", "Georgia", "Wisconsin", "Nevada", "Pennsylvania", "North Carolina", "Michigan")),
+  candidate_in_set = all(poll_data$candidate_name %in% c("Donald Trump", "Kamala Harris", "Jill Stein", "Chase Oliver")),
+  pct_range = all(poll_data$pct >= 40 & poll_data$pct <= 60),
+  start_before_end = all(poll_data$start_date < poll_data$end_date),
+  pollscore_negative = all(poll_data$pollscore < 0),
+  grade_range = all(poll_data$numeric_grade >= 2.0 & poll_data$numeric_grade <= 5.0)
+)
 
-#### Test data ####
-# Test that the dataset has 151 rows - there are 151 divisions in Australia
-test_that("dataset has 151 rows", {
-  expect_equal(nrow(analysis_data), 151)
-})
+# Validate the data
+validation_results <- confront(poll_data, rules)
 
-# Test that the dataset has 3 columns
-test_that("dataset has 3 columns", {
-  expect_equal(ncol(analysis_data), 3)
-})
-
-# Test that the 'division' column is character type
-test_that("'division' is character", {
-  expect_type(analysis_data$division, "character")
-})
-
-# Test that the 'party' column is character type
-test_that("'party' is character", {
-  expect_type(analysis_data$party, "character")
-})
-
-# Test that the 'state' column is character type
-test_that("'state' is character", {
-  expect_type(analysis_data$state, "character")
-})
-
-# Test that there are no missing values in the dataset
-test_that("no missing values in dataset", {
-  expect_true(all(!is.na(analysis_data)))
-})
-
-# Test that 'division' contains unique values (no duplicates)
-test_that("'division' column contains unique values", {
-  expect_equal(length(unique(analysis_data$division)), 151)
-})
-
-# Test that 'state' contains only valid Australian state or territory names
-valid_states <- c("New South Wales", "Victoria", "Queensland", "South Australia", "Western Australia", 
-                  "Tasmania", "Northern Territory", "Australian Capital Territory")
-test_that("'state' contains valid Australian state names", {
-  expect_true(all(analysis_data$state %in% valid_states))
-})
-
-# Test that there are no empty strings in 'division', 'party', or 'state' columns
-test_that("no empty strings in 'division', 'party', or 'state' columns", {
-  expect_false(any(analysis_data$division == "" | analysis_data$party == "" | analysis_data$state == ""))
-})
-
-# Test that the 'party' column contains at least 2 unique values
-test_that("'party' column contains at least 2 unique values", {
-  expect_true(length(unique(analysis_data$party)) >= 2)
-})
+# View validation results
+print(validation_results)

@@ -1,89 +1,55 @@
 #### Preamble ####
-# Purpose: Tests the structure and validity of the simulated Australian 
-  #electoral divisions dataset.
-# Author: Rohan Alexander
-# Date: 26 September 2024
-# Contact: rohan.alexander@utoronto.ca
-# License: MIT
+# Purpose: Tests the structure and validity of the simulated American election data
+# Author: Sakura Noskor, Yan Mezhiborsky, Cristina Burca
+# Date: 3 November 2024
+# Contact: cristina.burca@mail.utoronto.ca, sakura.noskor@mail.utoronto.ca,  yan.mezhiborsky@mail.utoronto.ca
 # Pre-requisites: 
   # - The `tidyverse` package must be installed and loaded
   # - 00-simulate_data.R must have been run
-# Any other information needed? Make sure you are in the `starter_folder` rproj
 
+
+
+install.packages("validate")
+install.packages("testthat")
 
 #### Workspace setup ####
 library(tidyverse)
 
-analysis_data <- read_csv("data/00-simulated_data/simulated_data.csv")
+# Load necessary libraries
+# Load necessary libraries
+library(testthat)
+library(validate)
+library(readr)
 
-# Test if the data was successfully loaded
-if (exists("analysis_data")) {
-  message("Test Passed: The dataset was successfully loaded.")
-} else {
-  stop("Test Failed: The dataset could not be loaded.")
-}
+# Load the simulated data
+poll_data <- read_csv("data/00-simulated_data/simulated_data.csv")
 
+# Define validation rules
+rules <- validator(
+  n_polls = nrow(poll_data) == 100,
+  n_cols = ncol(poll_data) == 9,
+  is_character_pollster = all(sapply(poll_data$pollster, is.character)),
+  is_numeric_sample_size = all(sapply(poll_data$sample_size, is.numeric)),
+  is_character_state = all(sapply(poll_data$state, is.character)),
+  is_character_candidate = all(sapply(poll_data$candidate_name, is.character)),
+  is_numeric_pct = all(sapply(poll_data$pct, is.numeric)),
+  is_date_start = all(sapply(poll_data$start_date, is.Date)),
+  is_date_end = all(sapply(poll_data$end_date, is.Date)),
+  is_numeric_pollscore = all(sapply(poll_data$pollscore, is.numeric)),
+  is_numeric_grade = all(sapply(poll_data$numeric_grade, is.numeric)),
+  pollster_in_set = all(poll_data$pollster %in% c("YouGov", "New York Times", "Ipsos", "The Washington Post", "1892 Polling")),
+  sample_size_in_set = all(poll_data$sample_size %in% c(800, 1000, 1200, 1500, 2000)),
+  state_in_set = all(poll_data$state %in% c("Arizona", "Georgia", "Wisconsin", "Nevada", "Pennsylvania", "North Carolina", "Michigan")),
+  candidate_in_set = all(poll_data$candidate_name %in% c("Donald Trump", "Kamala Harris", "Jill Stein", "Chase Oliver")),
+  pct_range = all(poll_data$pct >= 40 & poll_data$pct <= 60),
+  start_before_end = all(poll_data$start_date < poll_data$end_date),
+  pollscore_negative = all(poll_data$pollscore < 0),
+  grade_range = all(poll_data$numeric_grade >= 2.0 & poll_data$numeric_grade <= 5.0)
+)
 
-#### Test data ####
+# Validate the data
+validation_results <- confront(poll_data, rules)
 
-# Check if the dataset has 151 rows
-if (nrow(analysis_data) == 151) {
-  message("Test Passed: The dataset has 151 rows.")
-} else {
-  stop("Test Failed: The dataset does not have 151 rows.")
-}
+# View validation results
+print(validation_results)
 
-# Check if the dataset has 3 columns
-if (ncol(analysis_data) == 3) {
-  message("Test Passed: The dataset has 3 columns.")
-} else {
-  stop("Test Failed: The dataset does not have 3 columns.")
-}
-
-# Check if all values in the 'division' column are unique
-if (n_distinct(analysis_data$division) == nrow(analysis_data)) {
-  message("Test Passed: All values in 'division' are unique.")
-} else {
-  stop("Test Failed: The 'division' column contains duplicate values.")
-}
-
-# Check if the 'state' column contains only valid Australian state names
-valid_states <- c("New South Wales", "Victoria", "Queensland", "South Australia", 
-                  "Western Australia", "Tasmania", "Northern Territory", 
-                  "Australian Capital Territory")
-
-if (all(analysis_data$state %in% valid_states)) {
-  message("Test Passed: The 'state' column contains only valid Australian state names.")
-} else {
-  stop("Test Failed: The 'state' column contains invalid state names.")
-}
-
-# Check if the 'party' column contains only valid party names
-valid_parties <- c("Labor", "Liberal", "Greens", "National", "Other")
-
-if (all(analysis_data$party %in% valid_parties)) {
-  message("Test Passed: The 'party' column contains only valid party names.")
-} else {
-  stop("Test Failed: The 'party' column contains invalid party names.")
-}
-
-# Check if there are any missing values in the dataset
-if (all(!is.na(analysis_data))) {
-  message("Test Passed: The dataset contains no missing values.")
-} else {
-  stop("Test Failed: The dataset contains missing values.")
-}
-
-# Check if there are no empty strings in 'division', 'state', and 'party' columns
-if (all(analysis_data$division != "" & analysis_data$state != "" & analysis_data$party != "")) {
-  message("Test Passed: There are no empty strings in 'division', 'state', or 'party'.")
-} else {
-  stop("Test Failed: There are empty strings in one or more columns.")
-}
-
-# Check if the 'party' column has at least two unique values
-if (n_distinct(analysis_data$party) >= 2) {
-  message("Test Passed: The 'party' column contains at least two unique values.")
-} else {
-  stop("Test Failed: The 'party' column contains less than two unique values.")
-}

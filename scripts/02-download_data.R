@@ -1,26 +1,26 @@
 #### Preamble ####
-# Purpose: Downloads and saves the data from [...UPDATE THIS...]
-# Author: Rohan Alexander [...UPDATE THIS...]
-# Date: 11 February 2023 [...UPDATE THIS...]
-# Contact: rohan.alexander@utoronto.ca [...UPDATE THIS...]
-# License: MIT
-# Pre-requisites: [...UPDATE THIS...]
-# Any other information needed? [...UPDATE THIS...]
+# Purpose: Downloads and saves the data from [data](https://projects.fivethirtyeight.com/polls/president-general/2024/national/)
+# Author: Sakura Noskor, Yan Mezhiborsky, Cristina Burca
+# Date: 3 November 2024
+# Contact: cristina.burca@mail.utoronto.ca, sakura.noskor@mail.utoronto.ca,  yan.mezhiborsky@mail.utoronto.ca
+# Pre-requisites: go to the site above and search for “Download the data”, then select Presidential general election polls (current cycle), then “Download”
 
 
-#### Workspace setup ####
-library(opendatatoronto)
+
 library(tidyverse)
-# [...UPDATE THIS...]
 
-#### Download data ####
-# [...ADD CODE HERE TO DOWNLOAD...]
+# Load necessary libraries
+library(testthat)
+library(validate)
+library(readr)
 
 
+# Load the simulated data
+#the data is already downloaded in the repository. 
+data <- read.csv("../data/01-raw_data/raw_data.csv")
 
 #### Save data ####
-# [...UPDATE THIS...]
-# change the_raw_data to whatever name you assigned when you downloaded it.
-write_csv(the_raw_data, "inputs/data/raw_data.csv") 
+
+
 
          

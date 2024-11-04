@@ -1,52 +1,42 @@
 #### Preamble ####
-# Purpose: Simulates a dataset of Australian electoral divisions, including the 
-  #state and party that won each division.
-# Author: Rohan Alexander
-# Date: 26 September 2024
-# Contact: rohan.alexander@utoronto.ca
-# License: MIT
+# Purpose: Simulates a dataset of American election
+# Author: Sakura Noskor, Yan Mezhiborsky, Cristina Burca
+# Date: 3 November 2024
+# Contact: cristina.burca@mail.utoronto.ca, sakura.noskor@mail.utoronto.ca,  yan.mezhiborsky@mail.utoronto.ca
 # Pre-requisites: The `tidyverse` package must be installed
-# Any other information needed? Make sure you are in the `starter_folder` rproj
+
 
 
 #### Workspace setup ####
 library(tidyverse)
-set.seed(853)
+# Load necessary library
+library(dplyr)
 
+# Set seed for reproducibility
+set.seed(123)
 
-#### Simulate data ####
-# State names
-states <- c(
-  "New South Wales",
-  "Victoria",
-  "Queensland",
-  "South Australia",
-  "Western Australia",
-  "Tasmania",
-  "Northern Territory",
-  "Australian Capital Territory"
+# Parameters for the simulation
+num_polls <- 100
+pollsters <- c("YouGov", "New York Times", "Ipsos", "The Washington Post", "1892 Polling")
+states <- c("Arizona", "Georgia", "Wisconsin", "Nevada", "Pennsylvania", "North Carolina", "Michigan")
+candidates <- c("Donald Trump", "Kamala Harris", "Jill Stein", "Chase Oliver")
+
+# Generate simulated data
+poll_data <- data.frame(
+  pollster = sample(pollsters, num_polls, replace = TRUE),
+  sample_size = sample(c(800, 1000, 1200, 1500, 2000), num_polls, replace = TRUE),
+  state = sample(states, num_polls, replace = TRUE),
+  candidate_name = sample(candidates, num_polls, replace = TRUE),
+  pct = round(runif(num_polls, 40, 60), 1),  # Simulate percentages between 40 and 60
+  start_date = sample(seq(as.Date('2024-10-01'), as.Date('2024-10-10'), by="days"), num_polls, replace = TRUE),
+  end_date = sample(seq(as.Date('2024-10-11'), as.Date('2024-10-20'), by="days"), num_polls, replace = TRUE),
+  pollscore = round(runif(num_polls, -2.0, 0), 1),  # Simulate poll scores
+  numeric_grade = round(runif(num_polls, 2.0, 5.0), 1)  # Simulate numeric grades
 )
 
-# Political parties
-parties <- c("Labor", "Liberal", "Greens", "National", "Other")
-
-# Create a dataset by randomly assigning states and parties to divisions
-analysis_data <- tibble(
-  division = paste("Division", 1:151),  # Add "Division" to make it a character
-  state = sample(
-    states,
-    size = 151,
-    replace = TRUE,
-    prob = c(0.25, 0.25, 0.15, 0.1, 0.1, 0.1, 0.025, 0.025) # Rough state population distribution
-  ),
-  party = sample(
-    parties,
-    size = 151,
-    replace = TRUE,
-    prob = c(0.40, 0.40, 0.05, 0.1, 0.05) # Rough party distribution
-  )
-)
+# View the first few rows of the simulated data
+head(poll_data)
 
 
 #### Save data ####
-write_csv(analysis_data, "data/00-simulated_data/simulated_data.csv")
+write_csv(poll_data, "data/00-simulated_data/simulated_data.csv")
