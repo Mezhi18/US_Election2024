@@ -61,13 +61,12 @@ As there are over 50 variables many of which are redundant to our paper we will 
 - `state`: This variable tells us in which States the poll was conducted.
 - `candidate_name`: This is the full name of the selected candidate.
 - `pct`: This tells us the percentage of participants that intend to vote for the selected candidate.
-- `start_date`: The date the pollster began conducting the poll.
 - `end_date`: The date the pollster finished conducting the poll.
 
 The variables that we have create are:
 
 - `num_harris`: The number of participants that intend to vote for Kamala Harris.
-- `end_date_num`: The number of days since the first poll since Harris announced her candidacy. 
+- `end_date_num`: The number of days since the first poll since Harris announced her candidacy, calculated using `end_date`. 
 
 Each pollster has a numeric grade from 1.0 to 3.0, which indicates the quality/ reliability of the respective pollster. Additionally, each pollster is also given a transparency score from 1.0 to 10.0 reflecting how 'transparent' the pollster is, or how much information is disclosed about its polls and methodology. It is important for pollsters to maintain high numeric grades and transparency scores because these metrics directly reflect the quality and reliability of their data. To ensure the highest level of accuracy in our predictions, we only include polls with a numeric grade of 1.5 or above and a transparency score of 6.0 or above.
 
@@ -108,12 +107,18 @@ preddata <- data %>%
 #| label: fig-supportstate
 #| fig-cap: "Distribution of Support Percentage by State"
 
+
 harrisdata <- preddata %>%
   filter(state %in% c("Georgia", "Arizona", "Nevada", "Michigan", "North Carolina", "Pennsylvania", "Wisconsin")) %>%
   filter(candidate_name == "Kamala Harris") %>%
   mutate(end_date = mdy(end_date)) %>%
   filter(end_date >= as.Date("2024-07-21")) %>%
   mutate(num_harris = round((pct / 100) * sample_size, 0))
+
+harrisdata <- harrisdata %>%
+  mutate(
+    end_date_num = as.numeric(end_date - min(end_date)),
+        state = factor(state))
 
 trumpdata <- preddata %>%
   filter(state %in% c("Georgia", "Arizona", "Nevada", "Michigan", "North Carolina", "Pennsylvania", "Wisconsin")) %>%
@@ -160,19 +165,27 @@ In this analysis, we examine polling trends for Kamala Harris across key swing s
 
 Moving to @fig-supportharris, which isolates Harris's support percentages across states, we gain insight into the consistency and variability of her support. The box plot highlights states like Wisconsin and Pennsylvania, where the smaller interquartile ranges indicate less variability, suggesting that Harris's support is more stable in these regions. Conversely, states such as Nevada and Georgia show greater variability, as reflected in the larger spread of the boxes and whiskers, indicating that Harris's support fluctuates more in these areas.
 
-```{r, fig.height= 3, fig.width= 6}
+```{r, fig.height= 4, fig.width= 6}
 #| echo: false
 #| warning: false
 #| message: false
 #| label: fig-supportharris
 #| fig-cap:  "Support Percentage for Harris by State"
 
-ggplot(harrisdata, aes(x = reorder(state, pct, median), y = pct, fill = state)) +
-  geom_boxplot() +
-  coord_flip() +  # Flip for better readability
-  labs(x = "State", y = "Support Percentage") +
+harrisdata <- harrisdata %>%
+  filter(candidate_name == "Kamala Harris") %>%
+  mutate(end_date = as.Date(end_date, format = "%Y-%m-%d"))
+
+# Plot showing the variation in Harris's support percentages by pollster within each state
+ggplot(harrisdata, aes(x = state, y = pct)) +
+  geom_boxplot(aes(fill = state), alpha = 0.6, outlier.shape = NA) +  # Boxplot to show spread by pollster within each state
+  geom_jitter(aes(color = state), width = 0.2, alpha = 0.4) +  # Adds individual points with jitter to show individual poll results
+  labs(
+    x = "State",
+    y = "Support Percentage"
+  ) +
   theme_minimal() +
-  theme(legend.position = "none")
+  theme(legend.position = "none") 
 ```
 
 To explore temporal trends, we introduce the variable `end_date_num`, representing the number of days since Harris declared her candidacy. The next figures examine support trends over time in individual states.
@@ -256,18 +269,69 @@ ggplot(subset3, aes(x = end_date, y = pct, color = state)) +
 ```
 In @fig-supportGNN, we analyze Georgia, Nevada, and North Carolina. Nevada demonstrates the highest variability in Harris's support, which could reflect the state’s dynamic political response to recent campaign efforts. Georgia shows a steady upward trend, indicating growing support for Harris, while North Carolina reveals a slight decline since October, suggesting a possible shift in voter support.
 
-Overall, these visualizations illustrate that voter support for Harris varies significantly across states and over time. Notably, many states exhibit shifts in mid-September, indicating that voter opinions are sensitive to external factors or campaign dynamics during this period. This temporal variable, alongside state-specific characteristics, will inform the predictive model to better understand and forecast support for Harris in key regions.
+```{r, fig.width= 6, fig.height= 3}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-supportpollsters
+#| fig-cap: "Variation in Harris's Support Percentage Across Pollsters Over Time"
 
-## Outcome variables
+pollster_summary <- harrisdata %>%
+  group_by(end_date_num) %>%
+  summarize(
+    mean_support = mean(pct, na.rm = TRUE),
+    median_support = median(pct, na.rm = TRUE),
+    lower_quartile = quantile(pct, 0.25, na.rm = TRUE),
+    upper_quartile = quantile(pct, 0.75, na.rm = TRUE)
+  )
 
-Add graphs, tables and text. Use sub-sub-headings for each outcome variable or update the subheading to be singular.
-Talk more about it.
-Talk way more about it.
+ggplot() +
+  # Draw a line for each pollster from first to last poll
+  geom_line(data = harrisdata %>% group_by(pollster) %>% filter(n() > 1), 
+            aes(x = end_date_num, y = pct, group = pollster, color = pollster), 
+            alpha = 0.1) +
+  # Draw points for each poll (including those with only one poll)
+  geom_point(data = harrisdata, aes(x = end_date_num, y = pct, color = pollster), 
+             size = 0.5, alpha = 0.3) +
+  # Add the median line with ribbon for variability
+  geom_line(data = pollster_summary, aes(x = end_date_num, y = median_support), 
+            color = "blue", size = 1) +
+  geom_ribbon(data = pollster_summary, aes(x = end_date_num, ymin = lower_quartile, ymax = upper_quartile), 
+              fill = "lightblue", alpha = 0.2) +
+  labs(
+    x = "Days Since Declaration",
+    y = "Support Percentage"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
 
-## Predictor variables
+```
+In @fig-supportpollsters, we examine the impact of pollster variability on Harris's support percentage over time. This visualization introduces the variable pollster, highlighting the differences in polling results that arise from varying methodologies. The chart reveals considerable fluctuations and occasional outliers in Harris' support, likely due to the distinct approaches each pollster employs in sampling and weighting responses. 
 
-Add graphs, tables and text.
-Use sub-sub-headings for each outcome variable and feel free to combine a few into one if they go together naturally.
+Overall, these visualizations illustrate that Harris’s voter support is not only state-dependent but also fluctuates significantly over time. In particular, many states exhibit notable shifts around mid-September, pointing to potential influences from external events or campaign dynamics during this period. Furthermore, the observed variability across pollsters emphasizes the necessity of a robust model that can account for differences in pollster methodologies. By incorporating temporal patterns, state-specific characteristics, and pollster variability, our predictive model will aim to provide a more comprehensive and nuanced forecast of support for Harris in key regions, helping to isolate genuine shifts in public opinion from noise introduced by polling differences.
+
+
+## Outcome and Predictor variables
+
+In this analysis, our primary outcome variable is the support percentage for Kamala Harris. This variable represents the proportion of respondents in each poll who indicated support for Harris. Given the competitive nature of the election, understanding how this support varies across states and over time is crucial for identifying trends and forecasting her overall performance.
+
+
+To introduce the outcome and predictor variables effectively, you’ll want to set the stage for your model by clearly defining what you are trying to predict (the outcome variable) and the factors that you believe influence it (the predictor variables). This section should provide context on why each variable is included and how it might impact the results, without yet delving into the specific mechanics of the model itself.
+
+Here’s an example of how to structure this paragraph:
+
+In this analysis, our primary outcome variable is the support percentage for Kamala Harris. This variable represents the proportion of respondents in each poll who indicated support for Harris. Given the competitive nature of the election, understanding how this support varies across states and over time is crucial for identifying trends and forecasting her overall performance.
+
+To explain the outcome, we consider several predictor variables:
+
+1. State: Since support for candidates can vary significantly across different states due to regional demographics, political history, and local issues, the state variable allows us to capture these geographical differences. As shown in the earlier visualizations, some states demonstrate consistently higher or lower support for Harris, emphasizing the importance of including state-level distinctions in our analysis.
+
+2. Days Since Declaration: Representing the number of days since Harris declared her candidacy, this temporal variable helps us capture shifts in voter sentiment over time. Our analysis reveals several critical points where support trends noticeably change, such as the upward or downward shifts in mid-September. This predictor allows the model to account for these temporal patterns and track how Harris’s support evolves as the campaign progresses.
+
+3. Pollster: Given that different pollsters employ varied methodologies, sampling techniques, and weighting schemes, the pollster variable captures the potential variability introduced by each polling organization. As illustrated in @fig-supportpollsters, the results can vary considerably depending on the pollster, with some reporting notably higher or lower support percentages for Harris. By including pollster as a predictor, we aim to control for this source of variability, helping the model focus on underlying trends rather than discrepancies introduced by polling differences.
+
+Each of these predictors provides a distinct layer of insight into Harris’s support trends. Together, they form the foundation of our predictive model, which will use these variables to more accurately forecast shifts in voter support and clarify the impact of state, time, and pollster methodology on public opinion.
+
 
 # Model
 
@@ -285,18 +349,12 @@ y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
 ```
 
 
-We used the `stan_glmer` function from `rstanarm` package to create a Bayesian regression model with a Normal distribution. The dependent variable in the proportion of respondent who support Kamala Harris, and our model aims to predict Harris' support based on several importnat factors, modeled by: 
+We used the `stan_glmer` function from `rstanarm` package to create a Bayesian regression model with a Normal distribution. The dependent variable in the proportion of respondent who support Kamala Harris, and our model aims to predict Harris' support based on several important factors, modeled by: 
 
 ```{r}
 #| include: false
 #| warning: false
 #| message: false
-
-# Turn end_date into quantifiable column, to use for model
-harrisdata <- harrisdata %>%
-  mutate(
-    end_date_num = as.numeric(end_date - min(end_date)),
-        state = factor(state))
 
 # Define Model
 model <- cbind(num_harris, sample_size - num_harris) ~ (1 | state) + (1 | pollster) + (1 | end_date_num)
