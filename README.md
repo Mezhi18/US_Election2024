@@ -7,7 +7,7 @@ We analyse the probability of Kamala Harris winning in the 7 swing states of USA
 
 The repo is structured as:
 
--   `data/raw_data` contains the raw data as obtained from X.
+-   `data/raw_data` contains the raw data as obtained from @fivethirtyeight2024.
 -   `data/analysis_data` contains the cleaned dataset that was constructed. contains parquet too
 -   `model` contains fitted models. 
 -   `other` contains relevant literature, details about LLM chat interactions, and sketches.
