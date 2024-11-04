@@ -465,15 +465,6 @@ predicted_support_table <- harrisdata %>%
 
 kable(predicted_support_table, col.names = c("State", "Avg. Predicted Support for Harris"), digits = 2)
 ```
-```{r}
-
-
-```
-
-The goal of our modelling strategy is twofold. Firstly,...
-
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
-
 
 
 # Results
