@@ -523,8 +523,11 @@ We believe Wisconsin will vote: **Kamala Harris**
 
 ## Electoral Vote Projection and Predicted Outcome
 
-Without considering the swing states and if we assume all the other states will vote as expected Kamala Harris has a slight lead of 226 electoral votes to Donald Trump's 219. Now, if we take the 43 combined votes of Arizona, Georgia, and North Carolina, and add it to Trumps tally. While allocate Nevada, Michigan, Pennsylvania, and Wisconsin's votes to Harris which sum up to 50 electoral votes. This totals to a Democratic victory for Kamala Harris at 276 votes to Donald Trump's 262, we have come to the conclusion that Kamala Harris is likely to win the upcomming United States election by 14 electoral votes.
+Without considering the swing states and if we assume all the other states will vote as expected Kamala Harris has a slight lead of 226 electoral votes to Donald Trump's 219. Now, if we take the 43 combined votes of Arizona, Georgia, and North Carolina, and add it to Trumps tally. While allocate Nevada, Michigan, Pennsylvania, and Wisconsin's votes to Harris which sum up to 50 electoral votes. This totals to a Democratic victory for Kamala Harris at 276 votes to Donald Trump's 262, we have come to the conclusion that Kamala Harris is likely to win the upcomming United States election by 14 electoral votes. Below we have added a makeup of what we believe the election to look like in an image @270towin:
 
+::: {.cell}
+![Predicted Electoral Votes for the 2024 US Election ](../other/images/Election_map.png){fig-align="center" width="50%"}
+:::
 
 ## Limitations and Weaknesses
 - nuemric_grade couldve been used to weigh pollster results, for accuracy 
