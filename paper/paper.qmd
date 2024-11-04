@@ -513,6 +513,14 @@ We believe Pennsylvania will vote: **Kamala Harris**
 
 ## Wisconsin {#sec-wisconsin}
 
+The last swing state we will be discussing is Wisconsinng which we can see in our prediction table, @fig-supporttable, has the high support at 48.38% for Harris from all this swing states we looked at. when we look at @fig-supportWP, se a small spike in early september for Harris, followed by a gradual stabilization at around 48% support for Harris similar to what our model shows. Now if we also take into ac count @fig-supportstate, we see that Wisconsin has the largest difference in support for Harris in comparison to all previously mentioned swing states. 
+
+Lastly, if we look at Wisconsin's voting history, the only time Wisconsin voted Republican since 1988 was in 2016 when the state gave its electoral votes for Trump with 47.2% of the vote to Clinton's 46.5. then in 2020 the state went back to blue with Biden winning the state, allt hings considered out of all states we took into account Harris is likely to win.
+
+We believe Wisconsin will vote: **Kamala Harris**
+
+## Tally
+
 
 
 ## Weaknesses and next steps
