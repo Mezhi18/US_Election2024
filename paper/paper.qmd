@@ -514,7 +514,7 @@ Pennsylvania is an interesting for several reasons, the first is that before Tim
 
 Second, Similarly to Nevada and Michigan Pennsylvania Voted for Trump in 2016 with a 48.2% to a 47.5% victory, and for Biden in 2020 with a slightly more significant but not overwhelming victory at 50% to 48.8%. 2016 was the first time Pennsylvania voted for a republican candidate since 1988 @towin270. 
 
-Lastly, if we consider @fig-supportWP we see that harris has been polling at a consistent 48% since mid september which is somewhat similar to Georgia, while Pennsylvania seems to be leaning more democratic than republican than Georgia.@fig-supportGNN, they have both similarly increased their interest in Harris since the polling began until mid september which is when they both becan to plateau at their current polling numbers.
+Lastly, if we consider @fig-supportWP we see that harris has been polling at a consistent 48% since mid september which is somewhat similar to Georgia, while Pennsylvania seems to be leaning more democratic than republican than Georgia.@fig-supportGNN, they have both similarly increased their interest in Harris since the polling began until mid September which is when they both becan to plateau at their current polling numbers.
 
 We believe Pennsylvania will vote: **Kamala Harris**
 
