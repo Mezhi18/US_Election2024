@@ -386,7 +386,6 @@ In states such as Nevada, Pennsylvania, and Wisconsin, the model predicts a decl
 bay_model <-
   readRDS(file = here::here("models/bay_model.rds"))
 
-harrisdata_clean <- harrisdata %>% drop_na()
 
 harrisdata <- harrisdata %>% drop_na()
 expected_probs <- posterior_epred(bay_model, newdata = harrisdata)
@@ -443,23 +442,18 @@ CONFIDENCE INTERVAL TABLE ??
 #| echo: false
 #| warning: false
 #| message: false
+#| label: tbl-supporttable
+#| tbl-cap: "Averaged predicted support for Harris by state"
 
 expected_probs <- posterior_epred(bay_model, newdata = harrisdata)
-
-# Calculate the median predicted probability for each observation
 median_probs <- apply(expected_probs, 2, median)
-
-# Add median predicted probabilities to `harrisdata`
 harrisdata <- harrisdata %>%
   mutate(median_prob = median_probs)
 
-# Calculate the average predicted support by state
 predicted_support_table <- harrisdata %>%
   group_by(state) %>%
   summarize(average_predicted_support = round(mean(median_prob) * 100,2)) %>%
     arrange(average_predicted_support) 
-
-#predicted_support_table <- predicted_support_table[, c("state", "average_predicted_support")]
 
 kable(predicted_support_table, col.names = c("State", "Avg. Predicted Support for Harris"), digits = 2)
 ```
