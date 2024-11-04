@@ -275,12 +275,10 @@ In @fig-supportGNN, we analyze Georgia, Nevada, and North Carolina. Nevada demon
 
 pollster_summary <- harrisdata %>%
   group_by(end_date_num) %>%
-  summarize(
-    mean_support = mean(pct, na.rm = TRUE),
+  summarize(mean_support = mean(pct, na.rm = TRUE),
     median_support = median(pct, na.rm = TRUE),
     lower_quartile = quantile(pct, 0.25, na.rm = TRUE),
-    upper_quartile = quantile(pct, 0.75, na.rm = TRUE)
-  )
+    upper_quartile = quantile(pct, 0.75, na.rm = TRUE))
 
 ggplot() +
   # Draw a line for each pollster from first to last poll
@@ -375,14 +373,14 @@ The model predicts an average support percentage of approximately 47.33% for Kam
 
 The results indicate variations in predicted support across states. For instance, Pennsylvania and Wisconsin show the highest average predicted support percentages (48.02% and 48.38%, respectively), while states like Nevada and Arizona display slightly lower support. 
 
-In states like Arizona, Georgia, Michigan, and North Carolina, the model predicts a steady increase in support for Harris over time, as shown in @fig-modelGAWM.
+In states like Arizona, Georgia, Michigan, and North Carolina, the model predicts a steady increase in support for Harris over time, as shown in @fig-modelGANM.
 In states such as Nevada, Pennsylvania, and Wisconsin, the model predicts a decline in support over time, as seen in @fig-modelNPW.
 
 ```{r}
 #| echo: false
 #| warning: false
 #| message: false
-#| label: fig-modelGAWM
+#| label: fig-modelGANM
 #| fig-cap: "Poll predictions of Arizona, Geogria, Michigan, North Carolina"
 
 bay_model <-
