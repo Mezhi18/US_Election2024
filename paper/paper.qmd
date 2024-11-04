@@ -101,7 +101,7 @@ preddata <- data %>%
   filter(!is.na(state) & state != "")
 ```
 
-```{r}
+```{r, fig.height= 3}
 #| echo: false
 #| warning: false
 #| message: false
@@ -147,14 +147,13 @@ plot_data <- combined_data %>%
 # Plotting the support percentages side-by-side for each state
 ggplot(plot_data, aes(x = state, y = support_percentage, fill = candidate)) +
   geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
-  labs(
-    title = "Support Percentages for Harris and Trump by State",
+  labs(,
     x = "State",
     y = "Support Percentage"
   ) +
   scale_fill_manual(values = c("Harris" = "blue", "Trump" = "red"), name = "Candidate") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1, size = 8))
 ```
 
 In this analysis, we examine polling trends for Kamala Harris across key swing states, focusing on recent polling data from Arizona, Georgia, Michigan, Nevada, North Carolina, Pennsylvania, and Wisconsin [CITE NYT PAPER]. As shown in @fig-supportstate, which displays the support percentages for both Harris and Donald Trump side-by-side by state, the data reveals a competitive race, with relatively close support levels for both candidates in most states. While Trump has a slight edge in Arizona, Georgia, and North Carolina, Harris maintains a modest lead in Michigan, Nevada, and Pennsylvania.
@@ -176,7 +175,6 @@ ggplot(harrisdata, aes(x = reorder(state, pct, median), y = pct, fill = state)) 
   theme(legend.position = "none")
 ```
 
-
 To explore temporal trends, we introduce the variable `end_date_num`, representing the number of days since Harris declared her candidacy. The next figures examine support trends over time in individual states.
 
 
@@ -186,8 +184,6 @@ To explore temporal trends, we introduce the variable `end_date_num`, representi
 #| message: false
 #| label: fig-supportWP
 #| fig-cap:  "Support Percentage for Harris by State since Harris declared as Candidate for Wisconsin and Pennsylvania"
-#| label: fig-pollingharris
-#| fig-cap: "Polling for Harris By State"
 
 # Filter for a subset of states to plot separately
 subset1 <- harrisdata %>% filter(state %in% c("Wisconsin", "Pennsylvania"))
@@ -265,17 +261,12 @@ Overall, these visualizations illustrate that voter support for Harris varies si
 ## Outcome variables
 
 Add graphs, tables and text. Use sub-sub-headings for each outcome variable or update the subheading to be singular.
-
 Talk more about it.
-
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
-
 Talk way more about it.
 
 ## Predictor variables
 
 Add graphs, tables and text.
-
 Use sub-sub-headings for each outcome variable and feel free to combine a few into one if they go together naturally.
 
 # Model
