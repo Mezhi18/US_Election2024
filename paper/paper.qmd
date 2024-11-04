@@ -170,21 +170,21 @@ Use sub-sub-headings for each outcome variable and feel free to combine a few in
 
 # Model
 
-This is Model 1, follows Bayesian Model
-
 We define our model as:
 
-*define each vairable here*
 ```{=tex}
 \begin{align} 
 y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \beta_0 + \beta_1 \times \mbox{State}_i + \beta_2 \times \mbox{Days Since First Poll}_i + \beta_3 \times \mbox{Pollster}_i \\
+\mu_i &= \beta_0 + \beta_1 \times \mbox{State}_i + \beta_2 \times \mbox{Pollster}_i + \beta_3 \times \mbox{Days since first poll}_i\\
 \beta_0 &\sim \mbox{Normal}(0, 2.5) \\
 \beta_1 &\sim \mbox{Normal}(0, 2.5) \\
 \beta_2 &\sim \mbox{Normal}(0, 2.5) \\
 \beta_3 &\sim \mbox{Exponential}(1)
 \end{align}
 ```
+
+
+We used the `stan_glmer` function from `rstanarm` package to create a Bayesian regression model with a Normal distribution. The dependent variable in the proportion of respondent who support Kamala Harris, and our model aims to predict Harris' support based on several importnat factors, modeled by: 
 
 ```{r}
 #| include: false
@@ -208,10 +208,21 @@ bayesian_model <- stan_glmer(
   family = binomial(link = "logit"),
   prior = priors,
   prior_intercept = priors,
+  # weights = harrisdata$numeric_grade,
   seed = 123,
   cores = 4,
   adapt_delta = 0.95)
 ```
+
+where:
+
+- $y_i$ is the dependent variable, represneting the proportion of respondents who support Harris
+- $\beta_0$ is the intercept term, representing the expected proportion of $y_i$ when all other predictors are set to zero.
+- $\beta_1$ corresponds to the `state` choosing one of seven states,
+- $\beta_2$ corresponds to the `pollster`,
+- $\beta_3$ is the value representing number of days since the first poll. 
+
+All variables follow the normal distribution with a mean of 0 and a standard deviation of 2.5. 
 
 ```{r}
 #| echo: false
