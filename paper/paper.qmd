@@ -109,7 +109,7 @@ preddata <- data %>%
 #| warning: false
 #| message: false
 #| label: fig-supportstate
-#| fig-cap: "Distribution of Support Percentage by State"
+#| fig-cap: "Distribution of Support Percentage by State for Harris vs. Trump"
 
 
 harrisdata <- preddata %>%
@@ -193,7 +193,7 @@ To explore temporal trends, we introduce the variable `end_date_num`, representi
 #| warning: false
 #| message: false
 #| label: fig-supportWP
-#| fig-cap:  "Support Percentage for Harris by State since Harris declared as Candidate for Wisconsin and Pennsylvania"
+#| fig-cap:  "Predicted Support Percentage for Harris Over Time in Pennsylvania and Wisconsin Since Candidacy Declaration"
 
 
 subset1 <- harrisdata %>% filter(state %in% c("Wisconsin", "Pennsylvania"))
@@ -219,7 +219,7 @@ In @fig-supportWP, Pennsylvania and Wisconsin display distinct trends. In Pennsy
 #| warning: false
 #| message: false
 #| label: fig-supportAM
-#| fig-cap:  "Support Percentage for Harris by State since Harris declared as Candidate"
+#| fig-cap: "Predicted Support Percentage for Harris Over Time in Arizona and Michigan Since Candidacy Declaration"
 
 # Filter for the remaining states
 subset2 <- harrisdata %>% filter(state %in% c( "Arizona", "Michigan"))
@@ -245,7 +245,7 @@ ggplot(subset2, aes(x = end_date, y = pct, color = state)) +
 #| warning: false
 #| message: false
 #| label: fig-supportGNN
-#| fig-cap:  "Support Percentage for Harris by State since Harris declared as Candidate"
+#| fig-cap:  "Predicted Support Percentage for Harris Over Time in Georiga, Nevada, and North Carolina Since Candidacy Declaration"
 
 subset3 <- harrisdata %>% filter(state %in% c("Georgia", "North Carolina", "Nevada"))
 
@@ -266,12 +266,12 @@ ggplot(subset3, aes(x = end_date, y = pct, color = state)) +
 
 In @fig-supportGNN, we analyze Georgia, Nevada, and North Carolina. Nevada demonstrates the highest variability in Harris's support, which could reflect the state’s dynamic political response to recent campaign efforts. Georgia shows a steady upward trend, indicating growing support for Harris, while North Carolina reveals a slight decline since October, suggesting a possible shift in voter support.
 
-```{r, fig.width= 6, fig.height= 2}
+```{r, fig.width= 5.5, fig.height= 2.5}
 #| echo: false
 #| warning: false
 #| message: false
 #| label: fig-supportpollsters
-#| fig-cap: "Variation in Harris's Support Percentage Across Pollsters Over Time"
+#| fig-cap: "Variation in Harris's Support Percentage Across Pollsters Since Harris' Candidacy Declaration "
 
 pollster_summary <- harrisdata %>%
   group_by(end_date_num) %>%
@@ -383,7 +383,7 @@ In states such as Nevada, Pennsylvania, and Wisconsin, the model predicts a decl
 #| warning: false
 #| message: false
 #| label: fig-modelGANM
-#| fig-cap: "Poll predictions of Arizona, Geogria, Michigan, North Carolina"
+#| fig-cap: "Predicted Probability of Support for Harris Over Time in Arizona, Georgia, Michigan, and North Carolina Since Harris' Candidacy Declaration"
 
 bay_model <-
   readRDS(file = here::here("models/bay_model.rds"))
@@ -405,7 +405,7 @@ ggplot(subset_up, aes(x = end_date_num, y = median_prob, color = state)) +
     y = "Predicted Probability"
   ) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(axis.text.x = element_text(hjust = 1)) +
   facet_wrap(~ state) +
   theme(legend.position = "none")
 
