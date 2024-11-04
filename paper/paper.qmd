@@ -395,9 +395,19 @@ We believe Arizona will vote: **IDK**
 
 ## Georgia {#sec-georgia}
 
-Considering the last two elections Georgia is very similar to Arizona, as in 2016 Trump won the state with 50.8% to Clinton's 45.6%. While in the 2020 election Biden won with a slim victory of 49.5% to Trump's 49.3%, which again is very similar to Arizona's last two election results with significant republican victory in 2016 and a rather marginal win in 2020, which was the first democratic victory for the state since 1992. Georgia is in an interesting situation as lot of the democratic vote in the state comes from the black community, although Harris a has less support from male black population, which could very realistically result in a Trump victory in the state in the upcomming election.
+Considering the last two elections Georgia is very similar to Arizona, as in 2016 Trump won the state with 50.8% to Clinton's 45.6%. While in the 2020 election Biden won with a slim victory of 49.5% to Trump's 49.3%, which again is very similar to Arizona's last two election results with significant republican victory in 2016 and a rather marginal win in 2020, which was the first democratic victory for the state since 1992. Georgia is in an interesting situation as lot of the democratic vote in the state comes from the black community, although Harris a has less support from male black population, as the last victory for Biden was as a small margin, even a small percent of the population switching their vote could heavily impact the vote in 2024.
+
+In @fig-pollingharris at the beginning of the polling data the support for Harris was relatively low, while it did start to grow the polling percentage somewhat plateaued at around 47.5% and does not show any signs of growing. Furthermore, in @fig-supportstate we can see that Trump has the edge over Harris considering all of these factors there is a very real possibility that Trump does win Georgia at the end of the day.
+
+We believe Georgia will vote: **Trump**
+
+
 
 ## Michigan {#sec-michigan}
+
+Harris is currently leading the polls in Michigan with 48% of the vote and Trump with 43%, this is a rather significant margin.
+
+
 
 ## Nevada {#sec-nevada}
 
