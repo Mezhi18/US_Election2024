@@ -493,6 +493,12 @@ We believe Nevada will vote: **Kamala Harris**
 
 ## North Carolina {#sec-norcar}
 
+North Carolina has been an exclusively Republican state since 1980, with a singular exception in 2008 when the state was democratic and voted for Obama. This means that North Carolina voted for Trump in th last two elections, in 2016 there was more significant win for the republican with 49.8% of the vote, with 46.2% going to the Democrats. While in 2020, the Republicans maintained their support from the state but the margin of victory was slimmer with them receiving 49.9% of the vote and Biden getting 48.8%.
+
+Now, if we look at @fig-supportGNN Harris had a spike in early September like many other states where she was polling around 48%, but afterwards had a minor but gradual decline 
+since. Although when we take a look at our model results in @
+
+
 ## Michigan {#sec-michigan}
 
 Harris is currently leading the polls in Michigan with 49% of the vote and Trump with 47%, this is a rather slim margin, but the first in the discussed states where Harris is leading in the polls. In @fig-supportAM we can see that there was a significant jump for Harris and a small dip in October followed by a gradual increase leading up to the elections. When we look at the voting history of the state in the last two elections, the have voted for the same candidates as Arizona and Georgia, where they voted for Biden in 2020 and for Trump in 2016, with the voting percentages at 50.6% to 47.8% in 2020 and 47.5% to 47.3 in 2016 with respect to the winner. Although unlike the previously mentioned states 2016 was the first time the state voted for the republican candidate since 1992. Considering Michigan is home to the largest black majority city in the United states, Detroit, and a large majority of union workers who often vote democratic as it is seen as the more union-friendly party between the two it is rather like that Harris will win the state.
