@@ -547,17 +547,16 @@ Finally we take a look at how we sample from the gathered data. We thought about
 #| echo: false
 #| warning: false
 #| message: false
+#| label: fig-ppcheck
+#| fig-cap: "Posterior predictive check of model"
 
 # Plot checks for Model
 pp_check(bay_model)
-plot(bay_model, pars = "(Intercept)", prob = 0.95)
-modelsummary::modelsummary(
-  list(
-    "First model" = bay_model
-  ),
-  statistic = "mad",
-  fmt = 2
-)
+
 ```
+
+In @fig-ppcheck, we check the Posterior predictive check of model of our model. Since the raw data aligns closely with our prdictions, our model is a good predicton of the data.
+
+\newpage
 
 # References
