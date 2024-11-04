@@ -528,7 +528,10 @@ Weaknesses and next steps should also be included.
 
 # Appendix 1
 
-Why we choose NYT? - `numeric_grade` is 3 - `pollscore` is -1.5, a score of reliability called "Predictive Optimization of Latent skill Level in Surveys, Considering Overall Record, Empirically.", where negative numbers are better - `transparency_score` is 9, reflects pollsters transparency about their methodology (calculated based on how much information it discloses about its polls and weighted by recency) - `population_full` is 'rv', respondents are registered voters
+The New York Times/Siena College Poll is a respected polling partnership that provides data-driven insights into U.S. public opinion, particularly on political, social, and economic issues. Known for its rigorous methodology, this poll focuses on capturing the views of registered and likely voters across the country, with particular emphasis on key battleground states during election cycles. The poll is frequently cited for its accuracy and transparency, and is widely regarded as reliable by the public, political analysts, and the media.
+
+The New York Times/Siena College Poll is conducts live telephone interviews with a national sample of registered voters, using both landlines and cellphones, with over 90% of contacts made via cellphones. The sample frame is drawn from a comprehensive voter file covering 200 million registered voters. This file provides demographic and geographic information, enabling representative sampling across age, race, and political affiliation. The poll targets registered U.S. voters, with special focus on battleground states like Arizona, Georgia, Michigan, Nevada, Pennsylvania, and Wisconsin, determined as swing states. Respondents are randomly selected from the voter file, ensuring a diverse sample by region, party, and demographics. To mitigate non-response bias, the poll applies demographic weighting, increasing the weight of underrepresented groups, such as young adults or non-college graduates. Low response rates (around 2%) present challenges, to mitigate this, weighing adjustments are applied to correct for demographic imbalances and potential non-response bias. Questions are structured to be clear, neutral, and representative across political views, with each question carefully reviewed for balance and clarity. This process reduces the risk of bias in responses, though the brief format of phone surveys limits depth.
+
 
 # Appendix 2
 
@@ -541,7 +544,7 @@ Next to look at the actual contents of the survey. They can be accessed through 
 
 Finally we take a look at how we sample from the gathered data. We thought about random sampling but we were worried about having unequal proportions of the demographic we would advertise to. So if more people that go to facebook responded, that doesn't necessairly mean that people use facebook more than the other platforms. So we we decided to combine startified and cluster  sampling(@annurev). The idea is that we will choose based on the different platforms we advertise to first to have a cluster sampling method. And then we will sample the data by dividing the people by the certain aspects of the surevy, like if they are in different age groups or if they are registered voters. This is called Stratified Sampling (@annurev). Then we take a union of all the samples and we gather a group that we are able to build models based off of. 
 
-# Appendix 3 - checks and summary stats {#sec-checks}
+# Appendix 3 Posterior Predictive Check {#sec-checks}
 
 ```{r}
 #| echo: false
