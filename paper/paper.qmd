@@ -1,9 +1,10 @@
 ---
-title: "My title"
-subtitle: "My subtitle if needed"
+title: "Will Kamala Harris will win the 2024 Presidential election"
+subtitle: "Analysing the polls using baysian modeling"
 author: 
-  - First author
-  - Another author
+  - Yan Mezhiborsky
+  - Cristina Burca
+  - Shreya Sakura Noskor
 thanks: "Code and data are available at: [https://github.com/Mezhi18/US_Election2024.git](https://github.com/Mezhi18/US_Election2024.git)."
 date: today
 date-format: long
@@ -246,7 +247,7 @@ modelsummary::modelsummary(
 #| warning: false
 #| message: false
 
-harrisdata <- harrisdata %>% drop_na()
+harrisdata <- harrisdata |> drop_na()
 expected_probs <- posterior_epred(bayesian_model, newdata = harrisdata)
 median_probs <- apply(expected_probs, 2, median)
 harrisdata <- harrisdata %>%
