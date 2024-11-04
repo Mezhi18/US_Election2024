@@ -146,7 +146,7 @@ plot_data <- combined_data %>%
 
 # Plotting the support percentages side-by-side for each state
 ggplot(plot_data, aes(x = state, y = support_percentage, fill = candidate)) +
-  geom_bar(stat = "identity", position = position_dodge(width = 0.7)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
   labs(
     title = "Support Percentages for Harris and Trump by State",
     x = "State",
@@ -155,6 +155,18 @@ ggplot(plot_data, aes(x = state, y = support_percentage, fill = candidate)) +
   scale_fill_manual(values = c("Harris" = "blue", "Trump" = "red"), name = "Candidate") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+In this analysis, we examine polling trends for Kamala Harris across key swing states, focusing on recent polling data from Arizona, Georgia, Michigan, Nevada, North Carolina, Pennsylvania, and Wisconsin [CITE NYT PAPER]. As shown in @fig-supportstate, which displays the support percentages for both Harris and Donald Trump side-by-side by state, the data reveals a competitive race, with relatively close support levels for both candidates in most states. While Trump has a slight edge in Arizona, Georgia, and North Carolina, Harris maintains a modest lead in Michigan, Nevada, and Pennsylvania.
+
+Moving to @fig-supportharris, which isolates Harris's support percentages across states, we gain insight into the consistency and variability of her support. The box plot highlights states like Wisconsin and Pennsylvania, where the smaller interquartile ranges indicate less variability, suggesting that Harris's support is more stable in these regions. Conversely, states such as Nevada and Georgia show greater variability, as reflected in the larger spread of the boxes and whiskers, indicating that Harris's support fluctuates more in these areas.
+
+```{r, fig.height= 3, fig.width= 6}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-supportharris
+#| fig-cap:  "Support Percentage for Harris by State"
 
 ggplot(harrisdata, aes(x = reorder(state, pct, median), y = pct, fill = state)) +
   geom_boxplot() +
@@ -163,35 +175,90 @@ ggplot(harrisdata, aes(x = reorder(state, pct, median), y = pct, fill = state)) 
   theme_minimal() +
   theme(legend.position = "none")
 ```
-We focus on the swing states of the U.S, according to  [cite NYT PAPER]
 
 
-These are the statistics of each swing state by percetnage by state. 
+To explore temporal trends, we introduce the variable `end_date_num`, representing the number of days since Harris declared her candidacy. The next figures examine support trends over time in individual states.
 
-```{r}
+
+```{r, fig.width= 6, fig.height= 3}
 #| echo: false
 #| warning: false
 #| message: false
+#| label: fig-supportWP
+#| fig-cap:  "Support Percentage for Harris by State since Harris declared as Candidate for Wisconsin and Pennsylvania"
 
-#### Plot data ####
-base_plot <- ggplot(harrisdata, aes(x = end_date, y = pct)) +
-  theme_classic() +
-  labs(y = "Harris percent", x = "Date") +
-    theme(legend.position = "bottom")
+# Filter for a subset of states to plot separately
+subset1 <- harrisdata %>% filter(state %in% c("Wisconsin", "Pennsylvania"))
 
-base_plot +
-  geom_point(aes(color = state)) +
-  geom_smooth() +
-  theme(legend.position = "bottom")
-
-ggplot(harrisdata, aes(x = end_date, y = pct, color = state)) +
+# Plot the first subset
+ggplot(subset1, aes(x = end_date, y = pct, color = state)) +
   geom_point() +
   geom_smooth(se = TRUE) +
   facet_wrap(~ state, scales = "free_y") +
-  labs(y = "Harris Percent", x = "Date", title = "Polling Trends for Kamala Harris by State") +
-  theme_minimal()
+  labs(y = "Harris Percent", x = "Date") +
+  theme_minimal() +
+    scale_x_date(
+    date_breaks = "1 month",            # Set major breaks at monthly intervals
+    date_minor_breaks = "1 week",       # Optional: add minor weekly breaks for granularity
+    date_labels = "%b %d"               # Format to show abbreviated month and day (e.g., "Aug 01")
+  ) +
+   theme(legend.position = "none")
 
 ```
+In @fig-supportWP, Pennsylvania and Wisconsin display distinct trends. In Pennsylvania, support for Harris has been relatively consistent since early September, stabilizing around 48.5%. In contrast, Wisconsin shows a peak in support in mid-September, followed by a gradual decline that stabilizes in October. These observations suggest that while Pennsylvania remains a consistent stronghold for Harris, Wisconsin’s voter sentiment may be more susceptible to fluctuations.
+
+```{r, fig.width= 6, fig.height= 3}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-supportAM
+#| fig-cap:  "Support Percentage for Harris by State since Harris declared as Candidate"
+
+# Filter for the remaining states
+subset2 <- harrisdata %>% filter(state %in% c( "Arizona", "Michigan"))
+
+# Plot the second subset
+ggplot(subset2, aes(x = end_date, y = pct, color = state)) +
+  geom_point() +
+  geom_smooth(se = TRUE) +
+  facet_wrap(~ state, scales = "free_y") +
+  labs(y = "Harris Percent", x = "Date") +
+  theme_minimal() +
+      scale_x_date(
+    date_breaks = "1 month",
+    date_minor_breaks = "1 week",
+    date_labels = "%b %d" 
+  ) +
+   theme(legend.position = "none")
+```
+@fig-supportAM further examines Harris's support trends in Arizona and Michigan. Both states exhibit an upward trend in support starting in early October, which may suggest increasing favorability or strategic campaign efforts in these regions. This upward trajectory could indicate an opportunity for Harris to solidify her support in these competitive areas.
+
+```{r, fig.width= 7, fig.height= 3}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-supportGNN
+#| fig-cap:  "Support Percentage for Harris by State since Harris declared as Candidate"
+
+subset3 <- harrisdata %>% filter(state %in% c("Georgia", "North Carolina", "Nevada"))
+
+# Plot the first subset
+ggplot(subset3, aes(x = end_date, y = pct, color = state)) +
+  geom_point() +
+  geom_smooth(se = TRUE) +
+  facet_wrap(~ state, scales = "free_y") +
+  labs(y = "Harris Percent", x = "Date") +
+  theme_minimal() +
+        scale_x_date(
+    date_breaks = "1 month",
+    date_minor_breaks = "1 week",
+    date_labels = "%b %d" 
+  ) +
+   theme(legend.position = "none")
+```
+In @fig-supportGNN, we analyze Georgia, Nevada, and North Carolina. Nevada demonstrates the highest variability in Harris's support, which could reflect the state’s dynamic political response to recent campaign efforts. Georgia shows a steady upward trend, indicating growing support for Harris, while North Carolina reveals a slight decline since October, suggesting a possible shift in voter support.
+
+Overall, these visualizations illustrate that voter support for Harris varies significantly across states and over time. Notably, many states exhibit shifts in mid-September, indicating that voter opinions are sensitive to external factors or campaign dynamics during this period. This temporal variable, alongside state-specific characteristics, will inform the predictive model to better understand and forecast support for Harris in key regions.
 
 ## Outcome variables
 
@@ -343,7 +410,7 @@ harrisdata <- harrisdata %>%
 # Calculate the average predicted support by state
 predicted_support_table <- harrisdata %>%
   group_by(state) %>%
-  summarize(average_predicted_support = mean(median_prob) * 100)
+  summarize(average_predicted_support = round(mean(median_prob) * 100,2))
 
 # Print the table
 predicted_support_table
